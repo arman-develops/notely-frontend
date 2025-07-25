@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Alert, Box, Button, Card, CardContent, Divider, Fade, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
-import { Email, LockClockOutlined, Visibility, VisibilityOff } from '@mui/icons-material'
+import { EmailOutlined, LockOutlined, Visibility, VisibilityOff } from '@mui/icons-material'
 import type { AuthTypes } from "../types/authTypes";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/AuthStore";
+import { validateLogin } from "../utils/validators";
 
 export default function LoginPage() {
     const { isLoading, error, clearError } = useAuthStore()
@@ -14,24 +15,10 @@ export default function LoginPage() {
     })
     const [showPassword, setShowPassword] = useState(false)
     const [errors, setErrors] = useState<AuthTypes>({})
-    
-    const validateForm = (): Boolean => {
-        const newErrors:AuthTypes = {}
-        
-        if(!formData.identifier.trim()) {
-            newErrors.identifier = "Email or username is required"
-        }
-        if(!formData.password) {
-            newErrors.password = "Password is required"
-        }
-
-        setErrors(newErrors)
-        return Object.keys(newErrors).length === 0
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if(!validateForm()) return
+        if(!validateLogin({formData, setErrors})) return
 
         //clear error here
         //simulate login here
@@ -109,7 +96,7 @@ export default function LoginPage() {
                                         input: {
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <Email color="action" />
+                                                    <EmailOutlined color="action" />
                                                 </InputAdornment>
                                             ),
                                         }
@@ -129,7 +116,7 @@ export default function LoginPage() {
                                         input: {
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <LockClockOutlined color="action" />
+                                                    <LockOutlined color="action" />
                                                 </InputAdornment>
                                             ),
                                             endAdornment: (
@@ -182,7 +169,7 @@ export default function LoginPage() {
                                 <Box textAlign="center">
                                 <Typography variant="body2" color="text.secondary">
                                     Don't have an account?{" "}
-                                    <Link to="/signup" style={{ textDecoration: "none", fontWeight: 600, color: "#6366f1" }}>
+                                    <Link to="/register" style={{ textDecoration: "none", fontWeight: 600, color: "#6366f1" }}>
                                     Create one here
                                     </Link>
                                 </Typography>
