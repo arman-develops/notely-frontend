@@ -1,21 +1,39 @@
-import { useState } from "react"
-import { Box, Typography, TextField, Button, Paper, Chip } from "@mui/material"
-import { Create, CheckCircle } from "@mui/icons-material"
+"use client"
 
-type FirstNoteStepProps = {
-  onNext: () => void
-  onBack: () => void
+import type React from "react"
+import { Box, Typography, TextField, Button, Paper, Chip, Alert } from "@mui/material"
+import { Create, CheckCircle } from "@mui/icons-material"
+import { useAuthStore } from "../../store/AuthStore"
+
+interface NoteData {
+  title: string
+  content: string
+  synopsis: string
+  category: string
 }
 
-export default function FirstNoteStep({ onNext, onBack }: FirstNoteStepProps) {
-  const [noteTitle, setNoteTitle] = useState("")
-  const [noteContent, setNoteContent] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("")
+interface FirstNoteStepProps {
+  noteData: NoteData
+  onNoteChange: (data: NoteData) => void
+  onNext: () => void
+  onBack: () => void
+  isLoading?: boolean
+}
 
-  const categories = ["Personal", "Ideas", "Goals", "Thoughts", "Inspiration"]
+export default function FirstNoteStep({ noteData, onNoteChange, onNext, onBack, isLoading }: FirstNoteStepProps) {
+  const { error } = useAuthStore()
+
+  const categories = ["Personal", "Ideas", "Goals", "Thoughts", "Inspiration", "Work", "Learning"]
+
+  const handleChange = (field: keyof NoteData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    onNoteChange({ ...noteData, [field]: e.target.value })
+  }
+
+  const handleCategorySelect = (category: string) => {
+    onNoteChange({ ...noteData, category })
+  }
 
   const handleComplete = () => {
-    // In a real app, you'd save the note here
     onNext()
   }
 
@@ -37,6 +55,12 @@ export default function FirstNoteStep({ onNext, onBack }: FirstNoteStepProps) {
         </Typography>
       </Box>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
       <Paper
         elevation={2}
         sx={{
@@ -50,10 +74,24 @@ export default function FirstNoteStep({ onNext, onBack }: FirstNoteStepProps) {
         <TextField
           fullWidth
           label="Note Title"
-          value={noteTitle}
-          onChange={(e) => setNoteTitle(e.target.value)}
+          value={noteData.title}
+          onChange={handleChange("title")}
           placeholder="My first note..."
           sx={{ mb: 3 }}
+          disabled={isLoading}
+          inputProps={{ maxLength: 100 }}
+        />
+
+        <TextField
+          fullWidth
+          label="A brief summary..."
+          multiline
+          rows={6}
+          value={noteData.synopsis}
+          onChange={handleChange("synopsis")}
+          placeholder="Welcome to my digital notebook!..."
+          disabled={isLoading}
+          inputProps={{ maxLength: 2000 }}
         />
 
         <Box mb={3}>
@@ -65,9 +103,10 @@ export default function FirstNoteStep({ onNext, onBack }: FirstNoteStepProps) {
               <Chip
                 key={category}
                 label={category}
-                onClick={() => setSelectedCategory(category)}
-                variant={selectedCategory === category ? "filled" : "outlined"}
-                color={selectedCategory === category ? "primary" : "default"}
+                onClick={() => handleCategorySelect(category)}
+                variant={noteData.category === category ? "filled" : "outlined"}
+                color={noteData.category === category ? "primary" : "default"}
+                disabled={isLoading}
               />
             ))}
           </Box>
@@ -78,36 +117,43 @@ export default function FirstNoteStep({ onNext, onBack }: FirstNoteStepProps) {
           label="Your thoughts..."
           multiline
           rows={6}
-          value={noteContent}
-          onChange={(e) => setNoteContent(e.target.value)}
-          placeholder="Welcome to my digital notebook! Today I'm starting my journey with Notely..."
+          value={noteData.content}
+          onChange={handleChange("content")}
+          placeholder="Today I'm starting my journey with Notely..."
+          disabled={isLoading}
+          inputProps={{ maxLength: 2000 }}
         />
       </Paper>
 
       <Box textAlign="center" mb={3}>
         <Typography variant="body2" color="text.secondary">
-          Don't worry, you can always edit or delete this note later!
+          {noteData.title || noteData.content
+            ? "Your first note will be saved automatically!"
+            : "Don't worry, you can skip this step and create notes later."}
         </Typography>
       </Box>
 
       <Box display="flex" gap={2} justifyContent="space-between">
-        <Button variant="outlined" onClick={onBack} sx={{ px: 3 }}>
+        <Button variant="outlined" onClick={onBack} sx={{ px: 3 }} disabled={isLoading}>
           Back
         </Button>
         <Button
           variant="contained"
           onClick={handleComplete}
-          disabled={!noteTitle.trim() || !noteContent.trim()}
           startIcon={<CheckCircle />}
+          disabled={isLoading}
           sx={{
             px: 3,
             background: "linear-gradient(45deg, #10b981, #059669)",
             "&:hover": {
               background: "linear-gradient(45deg, #059669, #047857)",
             },
+            "&:disabled": {
+              background: "rgba(16, 185, 129, 0.5)",
+            },
           }}
         >
-          Complete Setup
+          {isLoading ? "Completing Setup..." : "Complete Setup"}
         </Button>
       </Box>
     </Box>
