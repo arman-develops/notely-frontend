@@ -13,12 +13,12 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />
   }
 
-  if (!user.hasCompletedOnboarding && window.location.pathname !== "/onboarding") {
-    return <Navigate to="/onboarding" replace />
+  if (!user.hasCompletedOnboarding && window.location.pathname !== "/app/onboarding") {
+    return <Navigate to="/app/onboarding" replace />
   }
 
-  if (user.hasCompletedOnboarding && window.location.pathname === "/onboarding") {
-    return <Navigate to="/dashboard" replace />
+  if (user.hasCompletedOnboarding && window.location.pathname === "/app/onboarding") {
+    return <Navigate to="/app/dashboard" replace />
   }
 
   return <>{children}</>
