@@ -3,6 +3,7 @@ import LoginPage from "./pages/LoginPage"
 import SignupPage from "./pages/SignupPage"
 import OnboardingFlow from "./pages/Onboarding"
 import ProtectedRoute from "./components/ProtectedRoutes"
+import Dashboard from "./pages/Dashboard"
 
 function App() {
   return (
@@ -14,6 +15,14 @@ function App() {
         element={
           <ProtectedRoute>
             <OnboardingFlow />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/app/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
           </ProtectedRoute>
         }
       />

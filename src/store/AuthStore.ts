@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import type { AuthState } from "../types/authState"
+import type { AuthState } from "../types/AuthState"
 import type { User } from "../types/User"
 
 export const useAuthStore = create<AuthState>()(
@@ -9,45 +9,25 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isLoading: false,
       error: null,
+      token: null,
 
-      login: async (email: string, _password: string) => {
-        set({ isLoading: true, error: null })
+      setLoading: (loading: boolean) => set({ isLoading: loading }),
 
-        try {
-          // Simulate API call
-          await new Promise((resolve) => setTimeout(resolve, 1000))
+      setError: (error: string | null) => set({ error }),
 
-          // Mock user data - in real app, this would come from your API
-          const mockUser: User = {
-            id: "1",
-            firstName: "John",
-            lastName: "Doe",
-            username: "johndoe",
-            email: email,
-            preferences: ["tech", "travel"],
-            hasCompletedOnboarding: true,
-            bio: "Love taking notes and organizing my thoughts!",
-          }
-
-          set({ user: mockUser, isLoading: false })
-        } catch (error) {
-          set({ error: "Login failed. Please try again.", isLoading: false })
-        }
+      setAuth: (user: User, token: string) => {
+        set({ user, token, isLoading: false, error: null })
       },
 
       signup: async (userData) => {
         set({ isLoading: true, error: null })
-
         try {
-          // Simulate API call
           await new Promise((resolve) => setTimeout(resolve, 1000))
-
           const newUser: User = {
             ...userData,
-            id: Date.now().toString(), // In real app, this would come from your API
+            id: Date.now().toString(),
             hasCompletedOnboarding: false,
           }
-
           set({ user: newUser, isLoading: false })
         } catch (error) {
           set({ error: "Signup failed. Please try again.", isLoading: false })
@@ -55,7 +35,9 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        set({ user: null, error: null })
+        set({ user: null, token: null, error: null })
+        // Clear token from localStorage/sessionStorage if stored separately
+        localStorage.removeItem("auth-token")
       },
 
       updateUser: (updates) => {
@@ -82,7 +64,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
-      partialize: (state) => ({ user: state.user }),
+      partialize: (state) => ({ user: state.user, token: state.token }),
     },
   ),
 )
