@@ -3,7 +3,8 @@ import LoginPage from "./pages/LoginPage"
 import SignupPage from "./pages/SignupPage"
 import OnboardingFlow from "./pages/Onboarding"
 import ProtectedRoute from "./components/ProtectedRoutes"
-import Dashboard from "./pages/Dashboard"
+import DashboardLayout from './layout/DashboardLayout';
+import DashboardPage from "./pages/Dashboard"
 
 function App() {
   return (
@@ -19,13 +20,19 @@ function App() {
         }
       />
       <Route
-        path="/app/dashboard"
+        path="/app"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="dashboard" element={<DashboardPage />} />
+        {/* <Route path="notes" element={<AllNotesPage />} />
+        <Route path="notes/new" element={<NewNotePage />} />
+        <Route path="notes/view/:id" element={<ViewNotePage />} /> */}
+        {/* Add more nested routes here */}
+      </Route>
     </Routes>
   )
 }
