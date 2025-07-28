@@ -7,6 +7,7 @@ import DashboardLayout from './layout/DashboardLayout';
 import DashboardPage from "./pages/Dashboard"
 import NewNotePage from "./pages/NewNotePage"
 import AllNotesPage from "./pages/AllNotesPage"
+import ViewNotePage from "./pages/ViewNotePage"
 
 function App() {
   return (
@@ -32,10 +33,7 @@ function App() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="notes/new" element={<NewNotePage />} />
         <Route path="notes" element={<AllNotesPage />} />
-        {/* <Route path="notes" element={<AllNotesPage />} />
-        
-        <Route path="notes/view/:id" element={<ViewNotePage />} /> */}
-        {/* Add more nested routes here */}
+        <Route path="notes/view/:id" element={<ViewNotePage />} />
       </Route>
     </Routes>
   )
