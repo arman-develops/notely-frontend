@@ -8,6 +8,8 @@ import DashboardPage from "./pages/Dashboard"
 import NewNotePage from "./pages/NewNotePage"
 import AllNotesPage from "./pages/AllNotesPage"
 import ViewNotePage from "./pages/ViewNotePage"
+import TrashPage from "./pages/TrashPage"
+import PinnedNotesPage from "./pages/PinnedNotesPage"
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
         <Route path="notes/new" element={<NewNotePage />} />
         <Route path="notes" element={<AllNotesPage />} />
         <Route path="notes/view/:id" element={<ViewNotePage />} />
+        <Route path="notes/trash" element={<TrashPage />} />
+        <Route path="notes/pinned" element={<PinnedNotesPage />} />
       </Route>
     </Routes>
   )
