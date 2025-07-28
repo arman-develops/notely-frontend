@@ -10,6 +10,7 @@ import AllNotesPage from "./pages/AllNotesPage"
 import ViewNotePage from "./pages/ViewNotePage"
 import TrashPage from "./pages/TrashPage"
 import PinnedNotesPage from "./pages/PinnedNotesPage"
+import BookmarkedNotesPage from "./pages/BookMarkedNotesPage"
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <Route path="notes/view/:id" element={<ViewNotePage />} />
         <Route path="notes/trash" element={<TrashPage />} />
         <Route path="notes/pinned" element={<PinnedNotesPage />} />
+        <Route path="notes/bookmarked" element={<BookmarkedNotesPage />} />
       </Route>
     </Routes>
   )
