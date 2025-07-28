@@ -56,7 +56,7 @@ export default function OnboardingFlow() {
 
   const completeOnboardingMutation = useMutation({
     mutationFn: async (data: OnboardingData): Promise<OnboardingResponse> => {
-      const response = await axiosInstance.put("/auth/onboarding", data)
+      const response = await axiosInstance.patch("/auth/onboarding", data)
       return response.data.data
     },
     onMutate: () => {
