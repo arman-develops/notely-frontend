@@ -5,6 +5,7 @@ import OnboardingFlow from "./pages/Onboarding"
 import ProtectedRoute from "./components/ProtectedRoutes"
 import DashboardLayout from './layout/DashboardLayout';
 import DashboardPage from "./pages/Dashboard"
+import NewNotePage from "./pages/NewNotePage"
 
 function App() {
   return (
@@ -28,8 +29,9 @@ function App() {
         }
       >
         <Route path="dashboard" element={<DashboardPage />} />
-        {/* <Route path="notes" element={<AllNotesPage />} />
         <Route path="notes/new" element={<NewNotePage />} />
+        {/* <Route path="notes" element={<AllNotesPage />} />
+        
         <Route path="notes/view/:id" element={<ViewNotePage />} /> */}
         {/* Add more nested routes here */}
       </Route>

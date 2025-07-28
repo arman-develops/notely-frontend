@@ -58,7 +58,7 @@ const navigationItems = [
     icon: Add,
     path: "/app/notes/new",
     description: "Create a new note",
-    highlight: true,
+    highlight: false,
   },
   {
     id: "all",
