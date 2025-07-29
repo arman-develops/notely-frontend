@@ -11,6 +11,7 @@ import ViewNotePage from "./pages/ViewNotePage"
 import TrashPage from "./pages/TrashPage"
 import PinnedNotesPage from "./pages/PinnedNotesPage"
 import BookmarkedNotesPage from "./pages/BookMarkedNotesPage"
+import ProfilePage from "./pages/ProfilePage"
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="notes/trash" element={<TrashPage />} />
         <Route path="notes/pinned" element={<PinnedNotesPage />} />
         <Route path="notes/bookmarked" element={<BookmarkedNotesPage />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
     </Routes>
   )

@@ -8,4 +8,5 @@ export interface User {
     hasCompletedOnboarding?: boolean
     bio?: string
     avatar?: string
+    dateJoined: Date
 }
