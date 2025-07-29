@@ -12,12 +12,14 @@ import TrashPage from "./pages/TrashPage"
 import PinnedNotesPage from "./pages/PinnedNotesPage"
 import BookmarkedNotesPage from "./pages/BookMarkedNotesPage"
 import ProfilePage from "./pages/ProfilePage"
+import LandingPage from "./pages/LandingPage"
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<SignupPage />} />
+      <Route path="/" element={<LandingPage />} />
       <Route
         path="/app"
         element={
