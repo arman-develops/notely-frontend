@@ -10,7 +10,7 @@ export interface Note {
   lastUpdated: string
   isDeleted: boolean
   isPinned: boolean
-  isBookmarked: boolean
+  isBookMarked: boolean
   userId: string
 }
 
@@ -99,7 +99,7 @@ export const useNotesStore = create<NotesState>()(
 
       toggleBookmark: (id) => {
         set((state) => ({
-          notes: state.notes.map((note) => (note.id === id ? { ...note, isBookmarked: !note.isBookmarked } : note)),
+          notes: state.notes.map((note) => (note.id === id ? { ...note, isBookmarked: !note.isBookMarked } : note)),
         }))
       },
 
@@ -116,7 +116,7 @@ export const useNotesStore = create<NotesState>()(
 
       getPinnedNotes: () => get().notes.filter((note) => !note.isDeleted && note.isPinned),
 
-      getBookmarkedNotes: () => get().notes.filter((note) => !note.isDeleted && note.isBookmarked),
+      getBookmarkedNotes: () => get().notes.filter((note) => !note.isDeleted && note.isBookMarked),
 
       getNoteById: (id) => get().notes.find((note) => note.id === id),
     }),

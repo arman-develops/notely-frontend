@@ -1,6 +1,6 @@
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Box,
@@ -179,20 +179,35 @@ export default function PinnedNotesPage() {
   const { notes, setNotes, deleteNote, togglePin, toggleBookmark, setError, error, clearError } = useNotesStore()
 
   // Fetch notes from backend
-  const { data: notesData, isLoading } = useQuery({
-    queryKey: ["notes", "pinned"],
+  const { data: notesData, isLoading, error: queryError } = useQuery({
+    queryKey: ["pinned"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/notes?isPinned=true")
-      return response.data
+      const response = await axiosInstance.get("/entries/pinned")
+      return response.data.data.pinnedEntries
     },
   })
 
+  // Update store with fetched data
+  useEffect(() => {
+    if (notesData && Array.isArray(notesData)) {
+      setNotes(notesData)
+    }
+  }, [notesData, setNotes])
+
+  // Handle query errors
+  useEffect(() => {
+    if (queryError) {
+      setError(queryError instanceof Error ? queryError.message : "Failed to fetch pinned notes")
+    }
+  }, [queryError, setError])
+
+  // Get pinned notes from store (after data is loaded)
   const pinnedNotes = notes.filter((note) => !note.isDeleted && note.isPinned)
 
   // Delete note mutation
   const deleteMutation = useMutation({
     mutationFn: async (noteId: string) => {
-      await axiosInstance.patch(`/notes/${noteId}`, { isDeleted: true })
+      await axiosInstance.patch(`/entries/${noteId}`, { isDeleted: true })
     },
     onSuccess: (_, noteId) => {
       deleteNote(noteId)
@@ -205,7 +220,7 @@ export default function PinnedNotesPage() {
   // Toggle pin mutation
   const pinMutation = useMutation({
     mutationFn: async ({ noteId, isPinned }: { noteId: string; isPinned: boolean }) => {
-      await axiosInstance.patch(`/notes/${noteId}`, { isPinned })
+      await axiosInstance.patch(`/entries/${noteId}`, { isPinned })
     },
     onSuccess: (_, { noteId }) => {
       togglePin(noteId)
@@ -218,7 +233,7 @@ export default function PinnedNotesPage() {
   // Toggle bookmark mutation
   const bookmarkMutation = useMutation({
     mutationFn: async ({ noteId, isBookmarked }: { noteId: string; isBookmarked: boolean }) => {
-      await axiosInstance.patch(`/notes/${noteId}`, { isBookmarked })
+      await axiosInstance.patch(`/entries/${noteId}`, { isBookmarked })
     },
     onSuccess: (_, { noteId }) => {
       toggleBookmark(noteId)
@@ -324,7 +339,7 @@ export default function PinnedNotesPage() {
       ) : (
         <Grid container spacing={3}>
           {pinnedNotes.map((note) => (
-            <Grid size={{xs:12, sm:6, md:4}} key={note.id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={note.id}>
               <NoteCard
                 note={note}
                 onEdit={handleEdit}

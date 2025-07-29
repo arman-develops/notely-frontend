@@ -49,8 +49,8 @@ export default function ViewNotePage() {
   } = useQuery({
     queryKey: ["note", id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/notes/${id}`)
-      return response.data.note
+      const response = await axiosInstance.get(`/entry/${id}`)
+      return response.data.data.entry
     },
     enabled: !!id,
     initialData: storeNote,
@@ -59,7 +59,7 @@ export default function ViewNotePage() {
   // Delete note mutation
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await axiosInstance.patch(`/notes/${id}`, { isDeleted: true })
+      await axiosInstance.patch(`/entry/${id}`, { isDeleted: true })
     },
     onSuccess: () => {
       deleteNote(id!)
@@ -70,7 +70,7 @@ export default function ViewNotePage() {
   // Toggle pin mutation
   const pinMutation = useMutation({
     mutationFn: async (isPinned: boolean) => {
-      await axiosInstance.patch(`/notes/${id}`, { isPinned })
+      await axiosInstance.patch(`/entry/${id}`, { isPinned })
     },
     onSuccess: () => {
       togglePin(id!)
@@ -80,7 +80,7 @@ export default function ViewNotePage() {
   // Toggle bookmark mutation
   const bookmarkMutation = useMutation({
     mutationFn: async (isBookmarked: boolean) => {
-      await axiosInstance.patch(`/notes/${id}`, { isBookmarked })
+      await axiosInstance.patch(`/entry/${id}`, { isBookmarked })
     },
     onSuccess: () => {
       toggleBookmark(id!)

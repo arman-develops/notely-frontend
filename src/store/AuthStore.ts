@@ -38,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, token: null, error: null })
         // Clear token from localStorage/sessionStorage if stored separately
         localStorage.removeItem("auth-token")
+        localStorage.removeItem("notes-storage")
       },
 
       updateUser: (updates) => {

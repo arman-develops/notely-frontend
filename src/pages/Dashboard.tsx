@@ -19,6 +19,8 @@ import {
   Container,
   useTheme,
   alpha,
+  CircularProgress,
+  Alert,
 } from "@mui/material"
 import {
   Add,
@@ -38,7 +40,9 @@ import {
 } from "@mui/icons-material"
 import { useAuthStore } from "../store/AuthStore"
 import { useNotesStore } from "../store/NotesStore"
-import { formatDistanceToNow, startOfWeek, endOfWeek, isWithinInterval, format } from "date-fns"
+import { useQuery } from "@tanstack/react-query"
+import axiosInstance from "../service/AxiosInstance"
+import { formatDistanceToNow, startOfWeek, endOfWeek, isWithinInterval, format, startOfDay, endOfDay } from "date-fns"
 
 interface StatCardProps {
   title: string
@@ -166,30 +170,136 @@ export default function DashboardPage() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { notes } = useNotesStore()
+  const { setNotes, error: storeError } = useNotesStore()
 
-  // Calculate statistics
-  const activeNotes = notes.filter((note) => !note.isDeleted)
-  const pinnedNotes = notes.filter((note) => !note.isDeleted && note.isPinned)
-  const bookmarkedNotes = notes.filter((note) => !note.isDeleted && note.isBookmarked)
-  const trashedNotes = notes.filter((note) => note.isDeleted)
+  // Fetch notes from backend
+  const { data: notesData, isLoading, isError, error: queryError } = useQuery({
+    queryKey: ["notes"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/entries")
+      return response.data.data.entries
+    },
+    retry: 2,
+    retryDelay: 1000,
+  })
 
-  // Calculate this week's notes
-  const weekStart = startOfWeek(new Date())
-  const weekEnd = endOfWeek(new Date())
-  const thisWeekNotes = notes.filter((note) =>
-    isWithinInterval(new Date(note.dateCreated), { start: weekStart, end: weekEnd }),
-  )
+  // Update store when data is fetched successfully
+  React.useEffect(() => {
+    if (notesData) {
+      setNotes(notesData)
+    }
+  }, [notesData, setNotes])
 
-  // Recent notes (last 5)
+  // Use fetched data as source of truth
+  const notes = notesData || []
+
+  // Calculate statistics with proper error handling
+  const activeNotes = notes.filter((note: any) => !note.isDeleted)
+  const pinnedNotes = notes.filter((note: any) => !note.isDeleted && note.isPinned)
+  const bookmarkedNotes = notes.filter((note: any) => !note.isDeleted && note.isBookMarked)
+  const trashedNotes = notes.filter((note: any) => note.isDeleted)
+
+  // Calculate this week's notes with proper date handling
+  const now = new Date()
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 }) // Start week on Monday
+  const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
+  
+  const thisWeekNotes = notes.filter((note: any) => {
+    try {
+      const noteDate = new Date(note.dateCreated)
+      return isWithinInterval(noteDate, { start: weekStart, end: weekEnd })
+    } catch (error) {
+      console.warn('Invalid date in note:', note.dateCreated)
+      return false
+    }
+  })
+
+  // Calculate today's notes
+  const todayStart = startOfDay(now)
+  const todayEnd = endOfDay(now)
+  const todayNotes = notes.filter((note: any) => {
+    try {
+      const noteDate = new Date(note.dateCreated)
+      return isWithinInterval(noteDate, { start: todayStart, end: todayEnd })
+    } catch (error) {
+      console.warn('Invalid date in note:', note.dateCreated)
+      return false
+    }
+  })
+
+  // Calculate previous week for trend calculation
+  const prevWeekStart = new Date(weekStart)
+  prevWeekStart.setDate(prevWeekStart.getDate() - 7)
+  const prevWeekEnd = new Date(weekEnd)
+  prevWeekEnd.setDate(prevWeekEnd.getDate() - 7)
+  
+  const lastWeekNotes = notes.filter((note: any) => {
+    try {
+      const noteDate = new Date(note.dateCreated)
+      return isWithinInterval(noteDate, { start: prevWeekStart, end: prevWeekEnd })
+    } catch (error) {
+      return false
+    }
+  })
+
+  // Calculate trend percentage
+  const calculateTrend = (current: number, previous: number): number => {
+    if (previous === 0) return current > 0 ? 100 : 0
+    return Math.round(((current - previous) / previous) * 100)
+  }
+
+  const notesTrend = calculateTrend(thisWeekNotes.length, lastWeekNotes.length)
+
+  // Recent notes (last 5) with proper sorting
   const recentNotes = activeNotes
-    .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
+    .filter((note: any) => note.lastUpdated) // Filter out notes without lastUpdated
+    .sort((a: any, b: any) => {
+      try {
+        return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+      } catch (error) {
+        return 0
+      }
+    })
     .slice(0, 5)
 
-  // Mock data for writing streak and goals
-  const writingStreak = 7 // Example: fetch from backend or calculate
+  // Calculate writing streak (mock implementation - you'd want to implement this properly)
+  const calculateWritingStreak = (): number => {
+    const sortedNotes = notes
+      .filter((note: any) => !note.isDeleted)
+      .sort((a: any, b: any) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
+    
+    if (sortedNotes.length === 0) return 0
+    
+    let streak = 0
+    let currentDate = new Date()
+    
+    // Simple streak calculation - check if there's a note each day going backwards
+    for (let i = 0; i < 30; i++) { // Check up to 30 days
+      const checkDate = new Date(currentDate)
+      checkDate.setDate(checkDate.getDate() - i)
+      
+      const hasNoteOnDate = sortedNotes.some((note: any) => {
+        try {
+          const noteDate = new Date(note.dateCreated)
+          return format(noteDate, 'yyyy-MM-dd') === format(checkDate, 'yyyy-MM-dd')
+        } catch (error) {
+          return false
+        }
+      })
+      
+      if (hasNoteOnDate) {
+        streak++
+      } else if (i > 0) { // Don't break on first day if no note today
+        break
+      }
+    }
+    
+    return streak
+  }
+
+  const writingStreak = calculateWritingStreak()
   const weeklyGoal = 10
-  const weeklyProgress = (thisWeekNotes.length / weeklyGoal) * 100
+  const weeklyProgress = weeklyGoal > 0 ? (thisWeekNotes.length / weeklyGoal) * 100 : 0
 
   const quickActions = [
     {
@@ -222,23 +332,72 @@ export default function DashboardPage() {
     },
   ]
 
-  const getGreeting = () => {
+  const getGreeting = (): string => {
     const hour = new Date().getHours()
     if (hour < 12) return "Good morning"
     if (hour < 17) return "Good afternoon"
     return "Good evening"
   }
 
+  // Calculate most active day (mock implementation)
+  const getMostActiveDay = (): string => {
+    const dayStats: { [key: string]: number } = {}
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    
+    notes.forEach((note: any) => {
+      try {
+        const noteDate = new Date(note.dateCreated)
+        const dayName = dayNames[noteDate.getDay()]
+        dayStats[dayName] = (dayStats[dayName] || 0) + 1
+      } catch (error) {
+        // Skip invalid dates
+      }
+    })
+    
+    const mostActiveDay = Object.entries(dayStats).reduce(
+      (max, [day, count]) => count > max.count ? { day, count } : max,
+      { day: 'Monday', count: 0 }
+    )
+    
+    return mostActiveDay.day
+  }
+
+  if (isLoading) {
+    return (
+      <Container maxWidth="xl">
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+          <CircularProgress />
+        </Box>
+      </Container>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Container maxWidth="xl">
+        <Alert severity="error" sx={{ mt: 4 }}>
+          Failed to load dashboard data. Please refresh the page or try again later.
+        </Alert>
+      </Container>
+    )
+  }
+
   return (
     <Container maxWidth="xl">
       <Box mb={4}>
         <Typography variant="h3" fontWeight={700} gutterBottom>
-          {getGreeting()}, {user?.firstName}! 👋
+          {getGreeting()}, {user?.firstName || 'User'}! 👋
         </Typography>
         <Typography variant="h6" color="text.secondary">
           Ready to capture your thoughts and ideas today?
         </Typography>
       </Box>
+
+      {(storeError || queryError) && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          Some data might not be up to date. Please refresh if you encounter issues.
+        </Alert>
+      )}
 
       <Grid container spacing={3}>
         <Grid size={{xs:12, sm:6, md:3}}>
@@ -247,6 +406,7 @@ export default function DashboardPage() {
             value={activeNotes.length}
             icon={<Description />}
             color={theme.palette.primary.main}
+            trend={notesTrend}
             onClick={() => navigate("/app/notes")}
           />
         </Grid>
@@ -305,7 +465,7 @@ export default function DashboardPage() {
                     Progress
                   </Typography>
                   <Typography variant="body2" fontWeight={600}>
-                    {Math.round(weeklyProgress)}%
+                    {Math.round(Math.min(weeklyProgress, 100))}%
                   </Typography>
                 </Box>
                 <LinearProgress
@@ -419,8 +579,8 @@ export default function DashboardPage() {
                 </Box>
               ) : (
                 <List>
-                  {recentNotes.map((note, index) => (
-                    <React.Fragment key={note.id}>
+                  {recentNotes.map((note: any, index: number) => (
+                    <React.Fragment key={note.noteID}>
                       <ListItem
                         sx={{
                           cursor: "pointer",
@@ -430,7 +590,7 @@ export default function DashboardPage() {
                           },
                           py: 1.5,
                         }}
-                        onClick={() => navigate(`/app/notes/view/${note.id}`)}
+                        onClick={() => navigate(`/app/notes/view/${note.NoteID}`)}
                       >
                         <ListItemIcon>
                           <Box display="flex" alignItems="center" gap={0.5}>
@@ -442,16 +602,20 @@ export default function DashboardPage() {
                         <ListItemText
                           primary={
                             <Typography variant="subtitle1" fontWeight={500} noWrap>
-                              {note.title}
+                              {note.title || 'Untitled'}
                             </Typography>
                           }
                           secondary={
                             <Box>
                               <Typography variant="body2" color="text.secondary" noWrap>
-                                {note.synopsis}
+                                {note.synopsis || 'No synopsis available'}
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
-                                Last updated: {formatDistanceToNow(new Date(note.lastUpdated))} ago
+                                Last updated: {
+                                  note.lastUpdated 
+                                    ? formatDistanceToNow(new Date(note.lastUpdated)) + ' ago'
+                                    : 'Unknown'
+                                }
                               </Typography>
                             </Box>
                           }
@@ -461,7 +625,7 @@ export default function DashboardPage() {
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation()
-                              navigate(`/app/notes/view/${note.id}`)
+                              navigate(`/app/notes/view/${note.noteID}`)
                             }}
                             sx={{ color: theme.palette.primary.main }}
                           >
@@ -471,7 +635,7 @@ export default function DashboardPage() {
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation()
-                              navigate(`/app/notes/edit/${note.id}`)
+                              navigate(`/app/notes/edit/${note.noteID}`)
                             }}
                             sx={{ color: theme.palette.info.main }}
                           >
@@ -507,12 +671,7 @@ export default function DashboardPage() {
                     </Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    {
-                      notes.filter(
-                        (note) => format(new Date(note.dateCreated), "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd"),
-                      ).length
-                    }{" "}
-                    notes created today.
+                    {todayNotes.length} notes created today.
                   </Typography>
                 </Box>
 
@@ -524,7 +683,7 @@ export default function DashboardPage() {
                     </Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    Historically, your most active day is **Monday**.
+                    Historically, your most active day is {getMostActiveDay()}.
                   </Typography>
                 </Box>
 
@@ -532,11 +691,11 @@ export default function DashboardPage() {
                   <Box display="flex" alignItems="center" gap={2} mb={1}>
                     <Star color="warning" />
                     <Typography variant="body1" fontWeight={500}>
-                      Favorite Category
+                      Total Entries
                     </Typography>
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    You write most about **Personal** notes.
+                    You have created {activeNotes.length} notes in total.
                   </Typography>
                 </Box>
               </Box>

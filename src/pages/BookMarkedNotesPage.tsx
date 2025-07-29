@@ -45,7 +45,7 @@ interface NoteCardProps {
     dateCreated: string
     lastUpdated: string
     isPinned: boolean
-    isBookmarked: boolean
+    isBookMarked: boolean
   }
   onEdit: (id: string) => void
   onDelete: (id: string) => void
@@ -93,7 +93,7 @@ function NoteCard({ note, onEdit, onDelete, onView, onTogglePin, onToggleBookmar
           </Typography>
           <Box display="flex" alignItems="center" gap={0.5}>
             {note.isPinned && <PinDropOutlined color="primary" fontSize="small" />}
-            {note.isBookmarked && <BookmarkBorderOutlined color="secondary" fontSize="small" />}
+            {note.isBookMarked && <BookmarkBorderOutlined color="secondary" fontSize="small" />}
             <IconButton size="small" onClick={handleMenuOpen}>
               <MoreVert />
             </IconButton>
@@ -143,7 +143,7 @@ function NoteCard({ note, onEdit, onDelete, onView, onTogglePin, onToggleBookmar
           <IconButton
             size="small"
             onClick={() => onToggleBookmark(note.id)}
-            color={note.isBookmarked ? "secondary" : "default"}
+            color={note.isBookMarked ? "secondary" : "default"}
           >
             <Bookmark />
           </IconButton>
@@ -165,7 +165,7 @@ function NoteCard({ note, onEdit, onDelete, onView, onTogglePin, onToggleBookmar
         </MenuItem>
         <MenuItem onClick={() => handleAction(() => onToggleBookmark(note.id))}>
           <Bookmark sx={{ mr: 2 }} />
-          {note.isBookmarked ? "Remove Bookmark" : "Bookmark"}
+          {note.isBookMarked ? "Remove Bookmark" : "Bookmark"}
         </MenuItem>
         <MenuItem onClick={() => handleAction(() => onDelete(note.id))} sx={{ color: "error.main" }}>
           <Delete sx={{ mr: 2 }} />
@@ -184,12 +184,12 @@ export default function BookmarkedNotesPage() {
   const { data: notesData, isLoading } = useQuery({
     queryKey: ["notes", "bookmarked"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/notes?isBookmarked=true")
-      return response.data
+      const response = await axiosInstance.get("/entries/bookmarked")
+      return response.data.data.bookMarkedEntries
     },
   })
 
-  const bookmarkedNotes = notes.filter((note) => !note.isDeleted && note.isBookmarked)
+  const bookmarkedNotes = notes.filter((note) => !note.isDeleted && note.isBookMarked)
 
   // Delete note mutation
   const deleteMutation = useMutation({
@@ -252,7 +252,7 @@ export default function BookmarkedNotesPage() {
   const handleToggleBookmark = (id: string) => {
     const note = notes.find((n) => n.id === id)
     if (note) {
-      bookmarkMutation.mutate({ noteId: id, isBookmarked: !note.isBookmarked })
+      bookmarkMutation.mutate({ noteId: id, isBookmarked: !note.isBookMarked })
     }
   }
 

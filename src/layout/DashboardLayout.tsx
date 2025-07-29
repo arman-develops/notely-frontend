@@ -103,7 +103,7 @@ export default function DashboardLayout() {
   // Calculate stats for badges
   const activeNotes = notes.filter((note) => !note.isDeleted)
   const pinnedCount = notes.filter((note) => !note.isDeleted && note.isPinned).length
-  const bookmarkedCount = notes.filter((note) => !note.isDeleted && note.isBookmarked).length
+  const bookmarkedCount = notes.filter((note) => !note.isDeleted && note.isBookMarked).length
   const trashCount = notes.filter((note) => note.isDeleted).length
 
   const getBadgeCount = (itemId: string) => {
@@ -409,13 +409,15 @@ export default function DashboardLayout() {
         onClick={handleProfileMenuClose}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        PaperProps={{
-          sx: {
-            mt: 1,
-            minWidth: 200,
-            borderRadius: 2,
-            boxShadow: theme.shadows[8],
-          },
+        slotProps={{
+            paper: {
+              sx: {
+              mt: 1,
+              minWidth: 200,
+              borderRadius: 2,
+              boxShadow: theme.shadows[8],
+            },
+          }
         }}
       >
         <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
