@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -13,7 +13,7 @@ import {
   alpha,
   Fade,
   Slide,
-} from "@mui/material"
+} from "@mui/material";
 import {
   StickyNote2,
   Create,
@@ -26,25 +26,28 @@ import {
   PlayArrow,
   BookmarkBorder,
   PushPin,
-} from "@mui/icons-material"
+} from "@mui/icons-material";
 
 const features = [
   {
     icon: Create,
     title: "Rich Text Editor",
-    description: "Write with Markdown support, syntax highlighting, and real-time preview",
+    description:
+      "Write with Markdown support, syntax highlighting, and real-time preview",
     color: "#6366f1",
   },
   {
     icon: Search,
     title: "Smart Search",
-    description: "Find your notes instantly with powerful search and filtering capabilities",
+    description:
+      "Find your notes instantly with powerful search and filtering capabilities",
     color: "#8b5cf6",
   },
   {
     icon: Cloud,
     title: "Cloud Sync",
-    description: "Access your notes anywhere, anytime with seamless cloud synchronization",
+    description:
+      "Access your notes anywhere, anytime with seamless cloud synchronization",
     color: "#06b6d4",
   },
   {
@@ -65,46 +68,48 @@ const features = [
     description: "Optimized performance for seamless note-taking experience",
     color: "#ef4444",
   },
-]
+];
 
 const testimonials = [
   {
     name: "Sarah Johnson",
     role: "Content Creator",
     avatar: "/placeholder.svg?height=60&width=60",
-    content: "Notely has transformed how I organize my ideas. The interface is beautiful and intuitive!",
+    content:
+      "Notely has transformed how I organize my ideas. The interface is beautiful and intuitive!",
     rating: 5,
   },
   {
     name: "Michael Chen",
     role: "Software Engineer",
     avatar: "/placeholder.svg?height=60&width=60",
-    content: "The Markdown support and code highlighting make it perfect for technical documentation.",
+    content:
+      "The Markdown support and code highlighting make it perfect for technical documentation.",
     rating: 5,
   },
   {
     name: "Emily Rodriguez",
     role: "Student",
     avatar: "/placeholder.svg?height=60&width=60",
-    content: "I love how I can access my notes from anywhere. Perfect for my study sessions!",
+    content:
+      "I love how I can access my notes from anywhere. Perfect for my study sessions!",
     rating: 5,
   },
-]
+];
 
 const stats = [
   { number: "50K+", label: "Active Users" },
   { number: "1M+", label: "Notes Created" },
   { number: "99.9%", label: "Uptime" },
   { number: "4.9/5", label: "User Rating" },
-]
+];
 
 export default function LandingPage() {
-  const theme = useTheme()
-  const navigate = useNavigate()
+  const theme = useTheme();
+  const navigate = useNavigate();
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "background.default" }}>
-      {/* Navigation */}
       <Box
         sx={{
           position: "fixed",
@@ -182,7 +187,6 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* Hero Section */}
       <Box
         sx={{
           pt: 12,
@@ -205,7 +209,7 @@ export default function LandingPage() {
       >
         <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
           <Grid container spacing={6} alignItems="center">
-            <Grid size={{xs:12, md:6}}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Fade in timeout={1000}>
                 <Box>
                   <Typography
@@ -230,9 +234,12 @@ export default function LandingPage() {
                       Sanctuary
                     </span>
                   </Typography>
-                  <Typography variant="h5" sx={{ mb: 4, opacity: 0.9, lineHeight: 1.6 }}>
-                    Capture, organize, and access your thoughts with the most beautiful and intuitive note-taking
-                    experience ever created.
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: 4, opacity: 0.9, lineHeight: 1.6 }}
+                  >
+                    Capture, organize, and access your thoughts with the most
+                    beautiful and intuitive note-taking experience ever created.
                   </Typography>
                   <Box display="flex" gap={2} flexWrap="wrap">
                     <Button
@@ -248,7 +255,8 @@ export default function LandingPage() {
                         fontSize: "1.1rem",
                         background: "linear-gradient(45deg, #10b981, #059669)",
                         "&:hover": {
-                          background: "linear-gradient(45deg, #059669, #047857)",
+                          background:
+                            "linear-gradient(45deg, #059669, #047857)",
                         },
                       }}
                       endIcon={<ArrowForward />}
@@ -280,12 +288,13 @@ export default function LandingPage() {
                 </Box>
               </Fade>
             </Grid>
-            <Grid size={{xs:12, md:6}}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Slide direction="left" in timeout={1200}>
                 <Box
                   sx={{
                     position: "relative",
-                    transform: "perspective(1000px) rotateY(-15deg) rotateX(10deg)",
+                    transform:
+                      "perspective(1000px) rotateY(-15deg) rotateX(10deg)",
                     transformStyle: "preserve-3d",
                   }}
                 >
@@ -324,14 +333,20 @@ export default function LandingPage() {
                         }}
                       />
                     </Box>
-                    <Typography variant="h6" color="text.primary" fontWeight={600} mb={2}>
+                    <Typography
+                      variant="h6"
+                      color="text.primary"
+                      fontWeight={600}
+                      mb={2}
+                    >
                       My Ideas & Thoughts
                     </Typography>
                     <Typography variant="body1" color="text.secondary" mb={2}>
                       # Project Planning
                     </Typography>
                     <Typography variant="body2" color="text.secondary" mb={3}>
-                      Today I had an amazing idea for a new feature that could revolutionize how we think about...
+                      Today I had an amazing idea for a new feature that could
+                      revolutionize how we think about...
                     </Typography>
                     <Box display="flex" gap={1}>
                       <Chip size="small" label="Ideas" color="primary" />
@@ -348,12 +363,11 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* Stats Section */}
       <Box sx={{ py: 6, backgroundColor: "background.paper" }}>
         <Container maxWidth="lg">
           <Grid container spacing={4}>
             {stats.map((stat, index) => (
-              <Grid size={{xs:6, md:3}} key={index}>
+              <Grid size={{ xs: 6, md: 3 }} key={index}>
                 <Box textAlign="center">
                   <Typography
                     variant="h3"
@@ -368,7 +382,11 @@ export default function LandingPage() {
                   >
                     {stat.number}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" fontWeight={500}>
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    fontWeight={500}
+                  >
                     {stat.label}
                   </Typography>
                 </Box>
@@ -396,16 +414,21 @@ export default function LandingPage() {
                 organize your thoughts
               </span>
             </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: "auto" }}>
-              AI-Powered features designed to make note-taking effortless and enjoyable
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              sx={{ maxWidth: 600, mx: "auto" }}
+            >
+              AI-Powered features designed to make note-taking effortless and
+              enjoyable
             </Typography>
           </Box>
 
           <Grid container spacing={4}>
             {features.map((feature, index) => {
-              const Icon = feature.icon
+              const Icon = feature.icon;
               return (
-                <Grid size={{xs:12, md:6, lg:4}} key={index}>
+                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={index}>
                   <Card
                     sx={{
                       p: 4,
@@ -433,18 +456,21 @@ export default function LandingPage() {
                     <Typography variant="h6" fontWeight={600} gutterBottom>
                       {feature.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" lineHeight={1.7}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      lineHeight={1.7}
+                    >
                       {feature.description}
                     </Typography>
                   </Card>
                 </Grid>
-              )
+              );
             })}
           </Grid>
         </Container>
       </Box>
 
-      {/* Testimonials Section */}
       <Box sx={{ py: 10, backgroundColor: "background.paper" }}>
         <Container maxWidth="lg">
           <Box textAlign="center" mb={8}>
@@ -458,7 +484,7 @@ export default function LandingPage() {
 
           <Grid container spacing={4}>
             {testimonials.map((testimonial, index) => (
-              <Grid size={{xs:12, md:4}} key={index}>
+              <Grid size={{ xs: 12, md: 4 }} key={index}>
                 <Card
                   sx={{
                     p: 4,
@@ -481,11 +507,19 @@ export default function LandingPage() {
                       <Star key={i} sx={{ color: "#fbbf24", fontSize: 20 }} />
                     ))}
                   </Box>
-                  <Typography variant="body1" mb={3} fontStyle="italic" lineHeight={1.7}>
+                  <Typography
+                    variant="body1"
+                    mb={3}
+                    fontStyle="italic"
+                    lineHeight={1.7}
+                  >
                     {testimonial.content}
                   </Typography>
                   <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar src={testimonial.avatar} sx={{ width: 48, height: 48 }} />
+                    <Avatar
+                      src={testimonial.avatar}
+                      sx={{ width: 48, height: 48 }}
+                    />
                     <Box>
                       <Typography variant="subtitle2" fontWeight={600}>
                         {testimonial.name}
@@ -502,7 +536,6 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* CTA Section */}
       <Box
         sx={{
           py: 10,
@@ -518,7 +551,8 @@ export default function LandingPage() {
             note-taking experience?
           </Typography>
           <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
-            Join thousands of users who have already discovered the joy of organized thinking
+            Join thousands of users who have already discovered the joy of
+            organized thinking
           </Typography>
           <Button
             variant="contained"
@@ -543,11 +577,16 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* Footer */}
-      <Box sx={{ py: 6, backgroundColor: "background.paper", borderTop: `1px solid ${theme.palette.divider}` }}>
+      <Box
+        sx={{
+          py: 6,
+          backgroundColor: "background.paper",
+          borderTop: `1px solid ${theme.palette.divider}`,
+        }}
+      >
         <Container maxWidth="lg">
           <Grid container spacing={4}>
-            <Grid size={{xs:12, md:6}}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Box display="flex" alignItems="center" gap={2} mb={2}>
                 <Avatar
                   sx={{
@@ -569,8 +608,12 @@ export default function LandingPage() {
                 © {new Date().getFullYear()} Notely. All rights reserved.
               </Typography>
             </Grid>
-            <Grid size={{xs:12, md:6}}>
-              <Box display="flex" justifyContent={{ xs: "flex-start", md: "flex-end" }} gap={4}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box
+                display="flex"
+                justifyContent={{ xs: "flex-start", md: "flex-end" }}
+                gap={4}
+              >
                 <Box>
                   <Typography variant="subtitle2" fontWeight={600} mb={2}>
                     Product
@@ -605,5 +648,5 @@ export default function LandingPage() {
         </Container>
       </Box>
     </Box>
-  )
+  );
 }

@@ -1,41 +1,62 @@
-"use client"
-
-import type React from "react"
-import { Box, Typography, TextField, Button, Paper, Chip, Alert } from "@mui/material"
-import { Create, CheckCircle } from "@mui/icons-material"
-import { useAuthStore } from "../../store/AuthStore"
+import type React from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Chip,
+  Alert,
+} from "@mui/material";
+import { Create, CheckCircle } from "@mui/icons-material";
+import { useAuthStore } from "../../store/AuthStore";
 
 interface NoteData {
-  title: string
-  content: string
-  synopsis: string
-  category: string
+  title: string;
+  content: string;
+  synopsis: string;
+  category: string;
 }
 
 interface FirstNoteStepProps {
-  noteData: NoteData
-  onNoteChange: (data: NoteData) => void
-  onNext: () => void
-  onBack: () => void
-  isLoading?: boolean
+  noteData: NoteData;
+  onNoteChange: (data: NoteData) => void;
+  onNext: () => void;
+  onBack: () => void;
+  isLoading?: boolean;
 }
 
-export default function FirstNoteStep({ noteData, onNoteChange, onNext, onBack, isLoading }: FirstNoteStepProps) {
-  const { error } = useAuthStore()
+export default function FirstNoteStep({
+  noteData,
+  onNoteChange,
+  onNext,
+  onBack,
+  isLoading,
+}: FirstNoteStepProps) {
+  const { error } = useAuthStore();
 
-  const categories = ["Personal", "Ideas", "Goals", "Thoughts", "Inspiration", "Work", "Learning"]
+  const categories = [
+    "Personal",
+    "Ideas",
+    "Goals",
+    "Thoughts",
+    "Inspiration",
+    "Work",
+    "Learning",
+  ];
 
-  const handleChange = (field: keyof NoteData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    onNoteChange({ ...noteData, [field]: e.target.value })
-  }
+  const handleChange =
+    (field: keyof NoteData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      onNoteChange({ ...noteData, [field]: e.target.value });
+    };
 
   const handleCategorySelect = (category: string) => {
-    onNoteChange({ ...noteData, category })
-  }
+    onNoteChange({ ...noteData, category });
+  };
 
   const handleComplete = () => {
-    onNext()
-  }
+    onNext();
+  };
 
   return (
     <Box py={2}>
@@ -121,7 +142,7 @@ export default function FirstNoteStep({ noteData, onNoteChange, onNext, onBack, 
           onChange={handleChange("content")}
           placeholder="Today I'm starting my journey with Notely..."
           disabled={isLoading}
-          inputProps={{ maxLength: 2000 }}
+          slotProps={{ htmlInput: { maxLength: 2000 } }}
         />
       </Paper>
 
@@ -134,7 +155,12 @@ export default function FirstNoteStep({ noteData, onNoteChange, onNext, onBack, 
       </Box>
 
       <Box display="flex" gap={2} justifyContent="space-between">
-        <Button variant="outlined" onClick={onBack} sx={{ px: 3 }} disabled={isLoading}>
+        <Button
+          variant="outlined"
+          onClick={onBack}
+          sx={{ px: 3 }}
+          disabled={isLoading}
+        >
           Back
         </Button>
         <Button
@@ -157,5 +183,5 @@ export default function FirstNoteStep({ noteData, onNoteChange, onNext, onBack, 
         </Button>
       </Box>
     </Box>
-  )
+  );
 }

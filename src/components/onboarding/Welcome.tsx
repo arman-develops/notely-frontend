@@ -1,17 +1,17 @@
-import { Box, Typography, Button, Avatar } from "@mui/material"
-import { Celebration, StickyNote2 } from "@mui/icons-material"
+import { Box, Typography, Button, Avatar } from "@mui/material";
+import { Celebration, StickyNote2 } from "@mui/icons-material";
 
 type User = {
-  firstName: string
-  lastName: string
-  username: string
-  email: string
-}
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+};
 
 type WelcomeStepProps = {
-  user: User | null
-  onNext: () => void
-}
+  user: User | null;
+  onNext: () => void;
+};
 
 export default function WelcomeStep({ user, onNext }: WelcomeStepProps) {
   return (
@@ -64,12 +64,19 @@ export default function WelcomeStep({ user, onNext }: WelcomeStepProps) {
       </Typography>
 
       <Typography variant="h6" color="text.secondary" paragraph>
-        We're thrilled to have you join our community of note-takers and idea organizers!
+        We're thrilled to have you join our community of note-takers and idea
+        organizers!
       </Typography>
 
-      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: 400, mx: "auto" }}>
-        Let's take a few moments to set up your profile and personalize your Notely experience. This will help us tailor
-        the app to your unique note-taking style.
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        paragraph
+        sx={{ maxWidth: 400, mx: "auto" }}
+      >
+        Let's take a few moments to set up your profile and personalize your
+        Notely experience. This will help us tailor the app to your unique
+        note-taking style.
       </Typography>
 
       <Button
@@ -89,5 +96,5 @@ export default function WelcomeStep({ user, onNext }: WelcomeStepProps) {
         Let's Get Started!
       </Button>
     </Box>
-  )
+  );
 }

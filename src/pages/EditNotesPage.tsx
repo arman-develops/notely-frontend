@@ -1,7 +1,7 @@
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -16,7 +16,7 @@ import {
   IconButton,
   Tooltip,
   Divider,
-} from "@mui/material"
+} from "@mui/material";
 import {
   ArrowBack,
   Save,
@@ -28,68 +28,78 @@ import {
   Edit,
   AccessTime,
   CalendarToday,
-} from "@mui/icons-material"
-import { useNotesStore } from "../store/NotesStore"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import axiosInstance from "../service/AxiosInstance"
-import { formatDistanceToNow, format } from "date-fns"
-import { showToast } from "../utils/toast"
+} from "@mui/icons-material";
+import { useNotesStore } from "../store/NotesStore";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axiosInstance from "../service/AxiosInstance";
+import { formatDistanceToNow, format } from "date-fns";
+import { showToast } from "../utils/toast";
 
 interface EditNoteFormData {
-  title: string
-  synopsis: string
-  content: string
+  title: string;
+  synopsis: string;
+  content: string;
 }
 
 export default function EditNotePage() {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const { updateNote, togglePin, toggleBookmark, deleteNote, setError, error, clearError } = useNotesStore()
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const {
+    updateNote,
+    togglePin,
+    toggleBookmark,
+    deleteNote,
+    setError,
+    error,
+    clearError,
+  } = useNotesStore();
 
   const [formData, setFormData] = useState<EditNoteFormData>({
     title: "",
     synopsis: "",
     content: "",
-  })
-  const [hasChanges, setHasChanges] = useState(false)
+  });
+  const [hasChanges, setHasChanges] = useState(false);
   const [originalData, setOriginalData] = useState<EditNoteFormData>({
     title: "",
     synopsis: "",
     content: "",
-  })
+  });
 
   // Fetch note data
-  const { data: noteData, isLoading, error: queryError } = useQuery({
+  const {
+    data: noteData,
+    isLoading,
+    error: queryError,
+  } = useQuery({
     queryKey: ["note", id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/entry/${id}`)
-      return response.data.data.entry
+      const response = await axiosInstance.get(`/entry/${id}`);
+      return response.data.data.entry;
     },
     enabled: !!id,
-  })
+  });
 
-  // Initialize form data when note data is loaded
   useEffect(() => {
     if (noteData) {
       const initialData = {
         title: noteData.noteTitle || "",
         synopsis: noteData.synopsis || "",
         content: noteData.content || "",
-      }
-      setFormData(initialData)
-      setOriginalData(initialData)
-      setHasChanges(false) // Reset changes when data loads
-      clearError() // Clear any existing errors
+      };
+      setFormData(initialData);
+      setOriginalData(initialData);
+      setHasChanges(false);
+      clearError();
     }
-  }, [noteData, clearError])
+  }, [noteData, clearError]);
 
   // Update note mutation
   const updateMutation = useMutation({
     mutationFn: async (data: EditNoteFormData) => {
-      const response = await axiosInstance.patch(`/entry/${id}`, data)
-      // console.log(response.data.data.updatedEntry)
-      return response.data.data.updatedEntry
+      const response = await axiosInstance.patch(`/entry/${id}`, data);
+      return response.data.data.updatedEntry;
     },
     onSuccess: (updatedNote) => {
       updateNote(id!, {
@@ -97,145 +107,155 @@ export default function EditNotePage() {
         synopsis: updatedNote.synopsis,
         content: updatedNote.content,
         lastUpdated: updatedNote.lastUpdated,
-      })
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
-      queryClient.invalidateQueries({ queryKey: ["note", id] })
-      
-      // Update original data to reflect saved state
+      });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ["note", id] });
+
       const newData = {
         title: updatedNote.noteTitle,
         synopsis: updatedNote.synopsis,
         content: updatedNote.content,
-      }
-      setOriginalData(newData)
-      setHasChanges(false)
-      showToast.success("Note updated successfully!")
-      clearError()
+      };
+      setOriginalData(newData);
+      setHasChanges(false);
+      showToast.success("Note updated successfully!");
+      clearError();
     },
     onError: (error: any) => {
-      console.log(error)
-      const errorMessage = error.response?.data?.message || "Failed to update note"
-      setError(errorMessage)
-      showToast.error(errorMessage)
+      console.log(error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to update note";
+      setError(errorMessage);
+      showToast.error(errorMessage);
     },
-  })
+  });
 
-  // Toggle pin mutation
   const pinMutation = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.patch(`/entry/pin/${id}`)
-      return response.data.data.pinnedEntry
+      const response = await axiosInstance.patch(`/entry/pin/${id}`);
+      return response.data.data.pinnedEntry;
     },
     onSuccess: (updatedNote) => {
-      togglePin(id!)
-      queryClient.invalidateQueries({ queryKey: ["note", id] })
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
-      showToast.success(updatedNote.isPinned ? "Note pinned!" : "Note unpinned!")
+      togglePin(id!);
+      queryClient.invalidateQueries({ queryKey: ["note", id] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      showToast.success(
+        updatedNote.isPinned ? "Note pinned!" : "Note unpinned!",
+      );
     },
     onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || "Failed to pin/unpin note"
-      showToast.error(errorMessage)
+      const errorMessage =
+        error.response?.data?.message || "Failed to pin/unpin note";
+      showToast.error(errorMessage);
     },
-  })
+  });
 
-  // Toggle bookmark mutation
   const bookmarkMutation = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.patch(`/entry/bookmark/${id}`)
-      return response.data.data.bookmarkedEntry
+      const response = await axiosInstance.patch(`/entry/bookmark/${id}`);
+      return response.data.data.bookmarkedEntry;
     },
     onSuccess: (updatedNote) => {
-      toggleBookmark(id!)
-      queryClient.invalidateQueries({ queryKey: ["note", id] })
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
-      showToast.success(updatedNote.isBookmarked ? "Note bookmarked!" : "Bookmark removed!")
+      toggleBookmark(id!);
+      queryClient.invalidateQueries({ queryKey: ["note", id] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      showToast.success(
+        updatedNote.isBookmarked ? "Note bookmarked!" : "Bookmark removed!",
+      );
     },
     onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || "Failed to bookmark/unbookmark note"
-      showToast.error(errorMessage)
+      const errorMessage =
+        error.response?.data?.message || "Failed to bookmark/unbookmark note";
+      showToast.error(errorMessage);
     },
-  })
+  });
 
-  // Delete note mutation
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await axiosInstance.patch(`/entry/${id}`, { isDeleted: true })
+      await axiosInstance.patch(`/entry/${id}`, { isDeleted: true });
     },
     onSuccess: () => {
-      deleteNote(id!)
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
-      showToast.success("Note moved to trash!")
-      navigate("/app/notes")
+      deleteNote(id!);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      showToast.success("Note moved to trash!");
+      navigate("/app/notes");
     },
     onError: (error: any) => {
-      const errorMessage = error.response?.data?.message || "Failed to delete note"
-      showToast.error(errorMessage)
+      const errorMessage =
+        error.response?.data?.message || "Failed to delete note";
+      showToast.error(errorMessage);
     },
-  })
+  });
 
-  // Check for changes
   useEffect(() => {
     const hasFormChanges =
       formData.title !== originalData.title ||
       formData.synopsis !== originalData.synopsis ||
-      formData.content !== originalData.content
-    setHasChanges(hasFormChanges)
-  }, [formData, originalData])
+      formData.content !== originalData.content;
+    setHasChanges(hasFormChanges);
+  }, [formData, originalData]);
 
   const handleInputChange =
-    (field: keyof EditNoteFormData) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    (field: keyof EditNoteFormData) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setFormData((prev) => ({
         ...prev,
         [field]: event.target.value,
-      }))
-    }
+      }));
+    };
 
   const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
+    event.preventDefault();
     if (!hasChanges) {
-      showToast.info("No changes to save")
-      return
+      showToast.info("No changes to save");
+      return;
     }
-    updateMutation.mutate(formData)
-  }
+    updateMutation.mutate(formData);
+  };
 
   const handleCancel = () => {
     if (hasChanges) {
-      const confirmDiscard = window.confirm("You have unsaved changes. Are you sure you want to discard them?")
-      if (!confirmDiscard) return
-      
-      // Reset form to original data
-      setFormData(originalData)
-      setHasChanges(false)
+      const confirmDiscard = window.confirm(
+        "You have unsaved changes. Are you sure you want to discard them?",
+      );
+      if (!confirmDiscard) return;
+
+      setFormData(originalData);
+      setHasChanges(false);
     }
-    navigate(-1)
-  }
+    navigate(-1);
+  };
 
   const handleTogglePin = () => {
-    pinMutation.mutate()
-  }
+    pinMutation.mutate();
+  };
 
   const handleToggleBookmark = () => {
-    bookmarkMutation.mutate()
-  }
+    bookmarkMutation.mutate();
+  };
 
   const handleDelete = () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this note? It will be moved to trash.")
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this note? It will be moved to trash.",
+    );
     if (confirmDelete) {
-      deleteMutation.mutate()
+      deleteMutation.mutate();
     }
-  }
+  };
 
-  // Handle loading state
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+      >
         <CircularProgress />
       </Box>
-    )
+    );
   }
 
-  // Handle query error
   if (queryError) {
     return (
       <Container maxWidth="md">
@@ -243,28 +263,41 @@ export default function EditNotePage() {
           Failed to load note: {queryError.message || "Unknown error occurred"}
         </Alert>
       </Container>
-    )
+    );
   }
 
-  // Handle missing note data
   if (!noteData) {
     return (
       <Container maxWidth="md">
         <Alert severity="error">Note not found</Alert>
       </Container>
-    )
+    );
   }
 
   return (
     <Container maxWidth="md">
       <Box mb={4}>
-        <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => navigate(-1)}
+          sx={{ mb: 2 }}
+        >
           Back
         </Button>
 
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={3}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          mb={3}
+        >
           <Box>
-            <Typography variant="h4" component="h1" gutterBottom fontWeight={600}>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              fontWeight={600}
+            >
               Edit Note
             </Typography>
             <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
@@ -295,7 +328,11 @@ export default function EditNotePage() {
               </IconButton>
             </Tooltip>
 
-            <Tooltip title={noteData.isBookmarked ? "Remove bookmark" : "Bookmark note"}>
+            <Tooltip
+              title={
+                noteData.isBookmarked ? "Remove bookmark" : "Bookmark note"
+              }
+            >
               <IconButton
                 onClick={handleToggleBookmark}
                 color={noteData.isBookmarked ? "secondary" : "default"}
@@ -312,7 +349,11 @@ export default function EditNotePage() {
             </Tooltip>
 
             <Tooltip title="Delete note">
-              <IconButton onClick={handleDelete} color="error" disabled={deleteMutation.isPending}>
+              <IconButton
+                onClick={handleDelete}
+                color="error"
+                disabled={deleteMutation.isPending}
+              >
                 <Delete />
               </IconButton>
             </Tooltip>
@@ -334,7 +375,14 @@ export default function EditNotePage() {
               <Typography variant="h6" fontWeight={600}>
                 Edit Your Note
               </Typography>
-              {hasChanges && <Chip label="Unsaved changes" size="small" color="warning" variant="outlined" />}
+              {hasChanges && (
+                <Chip
+                  label="Unsaved changes"
+                  size="small"
+                  color="warning"
+                  variant="outlined"
+                />
+              )}
             </Box>
 
             <Divider sx={{ mb: 3 }} />
@@ -405,7 +453,9 @@ export default function EditNotePage() {
                 startIcon={<Save />}
                 disabled={!hasChanges || updateMutation.isPending}
                 sx={{
-                  background: hasChanges ? "linear-gradient(45deg, #6366f1, #8b5cf6)" : undefined,
+                  background: hasChanges
+                    ? "linear-gradient(45deg, #6366f1, #8b5cf6)"
+                    : undefined,
                   "&:hover": hasChanges
                     ? {
                         background: "linear-gradient(45deg, #4f46e5, #7c3aed)",
@@ -420,5 +470,5 @@ export default function EditNotePage() {
         </CardContent>
       </Card>
     </Container>
-  )
+  );
 }

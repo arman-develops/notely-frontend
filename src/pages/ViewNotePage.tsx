@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import type React from "react";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -20,7 +20,7 @@ import {
   Divider,
   Tooltip,
   Fab,
-} from "@mui/material"
+} from "@mui/material";
 import {
   ArrowBack,
   Edit,
@@ -33,26 +33,27 @@ import {
   Share,
   Print,
   Psychology,
-} from "@mui/icons-material"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import axiosInstance from "../service/AxiosInstance"
-import { useNotesStore } from "../store/NotesStore"
-import ReactMarkdown from "react-markdown"
-import { formatDistanceToNow, format } from "date-fns"
-import { showToast } from "../utils/toast"
-import AIAnalysis from "../components/ai/ai-analysis"
+} from "@mui/icons-material";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axiosInstance from "../service/AxiosInstance";
+import { useNotesStore } from "../store/NotesStore";
+import ReactMarkdown from "react-markdown";
+import { formatDistanceToNow, format } from "date-fns";
+import { showToast } from "../utils/toast";
+import AIAnalysis from "../components/ai/ai-analysis";
 
 export default function ViewNotePage() {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const { deleteNote, togglePin, toggleBookmark, getNoteById } = useNotesStore()
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { deleteNote, togglePin, toggleBookmark, getNoteById } =
+    useNotesStore();
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [showAIAnalysis, setShowAIAnalysis] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [showAIAnalysis, setShowAIAnalysis] = useState(false);
 
   // Get note from store first (for immediate display)
-  const storeNote = getNoteById(id!)
+  const storeNote = getNoteById(id!);
 
   // Fetch note from backend
   const {
@@ -62,93 +63,99 @@ export default function ViewNotePage() {
   } = useQuery({
     queryKey: ["note", id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/entry/${id}`)
-      return response.data.data.entry
+      const response = await axiosInstance.get(`/entry/${id}`);
+      return response.data.data.entry;
     },
     enabled: !!id,
     initialData: storeNote,
-  })
+  });
 
   // Delete note mutation
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await axiosInstance.patch(`/entry/${id}`, { isDeleted: true })
+      await axiosInstance.patch(`/entry/${id}`, { isDeleted: true });
     },
     onSuccess: () => {
-      deleteNote(id!)
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
-      showToast.success("Note moved to trash!")
-      navigate("/app/notes")
+      deleteNote(id!);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      showToast.success("Note moved to trash!");
+      navigate("/app/notes");
     },
     onError: () => {
-      showToast.error("Failed to delete note")
+      showToast.error("Failed to delete note");
     },
-  })
+  });
 
   // Toggle pin mutation
   const pinMutation = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.patch(`/entry/pin/${id}`)
-      return response.data.data.pinnedEntry
+      const response = await axiosInstance.patch(`/entry/pin/${id}`);
+      return response.data.data.pinnedEntry;
     },
     onSuccess: (updatedNote) => {
-      togglePin(id!)
-      queryClient.invalidateQueries({ queryKey: ["note", id] })
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
-      showToast.success(updatedNote.isPinned ? "Note pinned!" : "Note unpinned!")
+      togglePin(id!);
+      queryClient.invalidateQueries({ queryKey: ["note", id] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      showToast.success(
+        updatedNote.isPinned ? "Note pinned!" : "Note unpinned!",
+      );
     },
     onError: () => {
-      showToast.error("Failed to pin/unpin note")
+      showToast.error("Failed to pin/unpin note");
     },
-  })
+  });
 
   // Toggle bookmark mutation
   const bookmarkMutation = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.patch(`/entry/bookmark/${id}`)
-      return response.data.data.bookmarkedEntry
+      const response = await axiosInstance.patch(`/entry/bookmark/${id}`);
+      return response.data.data.bookmarkedEntry;
     },
     onSuccess: (updatedNote) => {
-      toggleBookmark(id!)
-      queryClient.invalidateQueries({ queryKey: ["note", id] })
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
-      showToast.success(updatedNote.isBookmarked ? "Note bookmarked!" : "Bookmark removed!")
+      toggleBookmark(id!);
+      queryClient.invalidateQueries({ queryKey: ["note", id] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      showToast.success(
+        updatedNote.isBookmarked ? "Note bookmarked!" : "Bookmark removed!",
+      );
     },
     onError: () => {
-      showToast.error("Failed to bookmark/unbookmark note")
+      showToast.error("Failed to bookmark/unbookmark note");
     },
-  })
+  });
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleMenuClose = () => {
-    setAnchorEl(null)
-  }
+    setAnchorEl(null);
+  };
 
   const handleEdit = () => {
-    navigate(`/app/notes/edit/${id}`)
-    handleMenuClose()
-  }
+    navigate(`/app/notes/edit/${id}`);
+    handleMenuClose();
+  };
 
   const handleDelete = () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this note? It will be moved to trash.")
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this note? It will be moved to trash.",
+    );
     if (confirmDelete) {
-      deleteMutation.mutate()
+      deleteMutation.mutate();
     }
-    handleMenuClose()
-  }
+    handleMenuClose();
+  };
 
   const handleTogglePin = () => {
-    pinMutation.mutate()
-    handleMenuClose()
-  }
+    pinMutation.mutate();
+    handleMenuClose();
+  };
 
   const handleToggleBookmark = () => {
-    bookmarkMutation.mutate()
-    handleMenuClose()
-  }
+    bookmarkMutation.mutate();
+    handleMenuClose();
+  };
 
   const handleShare = () => {
     if (navigator.share) {
@@ -156,25 +163,30 @@ export default function ViewNotePage() {
         title: note?.noteTitle,
         text: note?.synopsis,
         url: window.location.href,
-      })
+      });
     } else {
-      navigator.clipboard.writeText(window.location.href)
-      showToast.success("Link copied to clipboard!")
+      navigator.clipboard.writeText(window.location.href);
+      showToast.success("Link copied to clipboard!");
     }
-    handleMenuClose()
-  }
+    handleMenuClose();
+  };
 
   const handlePrint = () => {
-    window.print()
-    handleMenuClose()
-  }
+    window.print();
+    handleMenuClose();
+  };
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+      >
         <CircularProgress />
       </Box>
-    )
+    );
   }
 
   if (error || !note) {
@@ -183,11 +195,15 @@ export default function ViewNotePage() {
         <Alert severity="error" sx={{ mt: 4 }}>
           {note?.isDeleted ? "This note has been deleted." : "Note not found."}
         </Alert>
-        <Button startIcon={<ArrowBack />} onClick={() => navigate("/app/notes")} sx={{ mt: 2 }}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => navigate("/app/notes")}
+          sx={{ mt: 2 }}
+        >
           Back to Notes
         </Button>
       </Container>
-    )
+    );
   }
 
   if (note.isDeleted) {
@@ -196,28 +212,43 @@ export default function ViewNotePage() {
         <Alert severity="info" sx={{ mt: 4 }}>
           This note has been moved to trash.
         </Alert>
-        <Button startIcon={<ArrowBack />} onClick={() => navigate("/app/notes")} sx={{ mt: 2 }}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => navigate("/app/notes")}
+          sx={{ mt: 2 }}
+        >
           Back to Notes
         </Button>
       </Container>
-    )
+    );
   }
 
   return (
     <Container maxWidth="lg">
       <Box mb={4}>
-        <Button startIcon={<ArrowBack />} onClick={() => navigate("/app/notes")} sx={{ mb: 2 }}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => navigate("/app/notes")}
+          sx={{ mb: 2 }}
+        >
           Back to Notes
         </Button>
 
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          mb={2}
+        >
           <Box flexGrow={1}>
             <Box display="flex" alignItems="center" gap={1} mb={1}>
               <Typography variant="h4" component="h1" fontWeight={600}>
                 {note.noteTitle}
               </Typography>
               {note.isPinned && <PinDropOutlined color="primary" />}
-              {note.isBookmarked && <BookmarkBorderOutlined color="secondary" />}
+              {note.isBookmarked && (
+                <BookmarkBorderOutlined color="secondary" />
+              )}
             </Box>
 
             {note.synopsis && (
@@ -227,8 +258,16 @@ export default function ViewNotePage() {
             )}
 
             <Box display="flex" gap={1} flexWrap="wrap">
-              <Chip label={`Created ${format(new Date(note.dateCreated), "PPP")}`} size="small" variant="outlined" />
-              <Chip label={`${formatDistanceToNow(new Date(note.dateCreated))} ago`} size="small" variant="outlined" />
+              <Chip
+                label={`Created ${format(new Date(note.dateCreated), "PPP")}`}
+                size="small"
+                variant="outlined"
+              />
+              <Chip
+                label={`${formatDistanceToNow(new Date(note.dateCreated))} ago`}
+                size="small"
+                variant="outlined"
+              />
               {note.lastUpdated !== note.dateCreated && (
                 <Chip
                   label={`Updated ${formatDistanceToNow(new Date(note.lastUpdated))} ago`}
@@ -316,15 +355,18 @@ export default function ViewNotePage() {
         </Grid>
 
         {showAIAnalysis && (
-          <Grid size={{xs:12, lg:4}}>
+          <Grid size={{ xs: 12, lg: 4 }}>
             <Box position="sticky" top={20}>
-              <AIAnalysis text={note.content} title={note.noteTitle} autoAnalyze={true} />
+              <AIAnalysis
+                text={note.content}
+                title={note.noteTitle}
+                autoAnalyze={true}
+              />
             </Box>
           </Grid>
         )}
       </Grid>
 
-      {/* Floating AI Button */}
       <Fab
         color="primary"
         sx={{
@@ -338,12 +380,18 @@ export default function ViewNotePage() {
         }}
         onClick={() => setShowAIAnalysis(!showAIAnalysis)}
       >
-        <Tooltip title={showAIAnalysis ? "Hide AI Analysis" : "Show AI Analysis"}>
+        <Tooltip
+          title={showAIAnalysis ? "Hide AI Analysis" : "Show AI Analysis"}
+        >
           <Psychology />
         </Tooltip>
       </Fab>
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
         <MenuItem onClick={handleEdit}>
           <Edit sx={{ mr: 2 }} />
           Edit
@@ -372,5 +420,5 @@ export default function ViewNotePage() {
         </MenuItem>
       </Menu>
     </Container>
-  )
+  );
 }

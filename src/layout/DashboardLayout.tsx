@@ -1,7 +1,7 @@
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Outlet, useNavigate, useLocation } from "react-router-dom"
+import { useState } from "react";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Drawer,
@@ -22,7 +22,7 @@ import {
   Tooltip,
   useTheme,
   alpha,
-} from "@mui/material"
+} from "@mui/material";
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon, // Renamed to avoid conflict with page component
@@ -38,17 +38,17 @@ import {
   Notifications,
   Settings,
   TrendingUp,
-} from "@mui/icons-material"
-import { useAuthStore } from "../store/AuthStore"
-import { useNotesStore } from "../store/NotesStore"
+} from "@mui/icons-material";
+import { useAuthStore } from "../store/AuthStore";
+import { useNotesStore } from "../store/NotesStore";
 
-const drawerWidth = 280
+const drawerWidth = 280;
 
 const navigationItems = [
   {
     id: "dashboard",
     label: "Dashboard",
-    icon: DashboardIcon, // Using renamed icon
+    icon: DashboardIcon,
     path: "/app/dashboard",
     description: "Overview and stats",
   },
@@ -88,74 +88,77 @@ const navigationItems = [
     path: "/app/notes/trash",
     description: "Deleted notes",
   },
-]
+];
 
 export default function DashboardLayout() {
-  const theme = useTheme()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { user, logout } = useAuthStore()
-  const { notes } = useNotesStore()
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useAuthStore();
+  const { notes } = useNotesStore();
 
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  // Calculate stats for badges
-  const activeNotes = notes.filter((note) => !note.isDeleted)
-  const pinnedCount = notes.filter((note) => !note.isDeleted && note.isPinned).length
-  const bookmarkedCount = notes.filter((note) => !note.isDeleted && note.isBookMarked).length
-  const trashCount = notes.filter((note) => note.isDeleted).length
+  const activeNotes = notes.filter((note) => !note.isDeleted);
+  const pinnedCount = notes.filter(
+    (note) => !note.isDeleted && note.isPinned,
+  ).length;
+  const bookmarkedCount = notes.filter(
+    (note) => !note.isDeleted && note.isBookMarked,
+  ).length;
+  const trashCount = notes.filter((note) => note.isDeleted).length;
 
   const getBadgeCount = (itemId: string) => {
     switch (itemId) {
       case "all":
-        return activeNotes.length
+        return activeNotes.length;
       case "pinned":
-        return pinnedCount
+        return pinnedCount;
       case "bookmarked":
-        return bookmarkedCount
+        return bookmarkedCount;
       case "trash":
-        return trashCount
+        return trashCount;
       default:
-        return 0
+        return 0;
     }
-  }
+  };
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
+    setMobileOpen(!mobileOpen);
+  };
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleProfileMenuClose = () => {
-    setAnchorEl(null)
-  }
+    setAnchorEl(null);
+  };
 
   const handleNavigation = (path: string) => {
-    navigate(path)
-    setMobileOpen(false)
-  }
+    navigate(path);
+    setMobileOpen(false);
+  };
 
   const handleLogout = () => {
-    logout()
-    navigate("/login")
-    handleProfileMenuClose()
-  }
+    logout();
+    navigate("/login");
+    handleProfileMenuClose();
+  };
 
   const getInitials = (firstName?: string, lastName?: string) => {
-    return `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`.toUpperCase()
-  }
+    return `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`.toUpperCase();
+  };
 
   const drawer = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Box sx={{ flexGrow: 1, px: 2, py: 2 }}>
         <List sx={{ "& .MuiListItem-root": { mb: 1 } }}>
           {navigationItems.map((item) => {
-            const Icon = item.icon
-            const isActive = location.pathname === item.path
-            const badgeCount = getBadgeCount(item.id)
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            const badgeCount = getBadgeCount(item.id);
 
             return (
               <ListItem key={item.id} disablePadding>
@@ -198,7 +201,11 @@ export default function DashboardLayout() {
                       }}
                     >
                       {badgeCount > 0 && item.id !== "new" ? (
-                        <Badge badgeContent={badgeCount} color={item.id === "trash" ? "error" : "primary"} max={99}>
+                        <Badge
+                          badgeContent={badgeCount}
+                          color={item.id === "trash" ? "error" : "primary"}
+                          max={99}
+                        >
                           <Icon />
                         </Badge>
                       ) : (
@@ -216,13 +223,13 @@ export default function DashboardLayout() {
                         secondary: {
                           fontSize: "0.75rem",
                           sx: { mt: 0.5 },
-                        }
+                        },
                       }}
                     />
                   </ListItemButton>
                 </Tooltip>
               </ListItem>
-            )
+            );
           })}
         </List>
       </Box>
@@ -235,8 +242,13 @@ export default function DashboardLayout() {
               sx={{
                 borderRadius: 2,
                 backgroundColor:
-                  location.pathname === "/app/profile" ? alpha(theme.palette.primary.main, 0.12) : "transparent",
-                color: location.pathname === "/app/profile" ? theme.palette.primary.main : theme.palette.text.primary,
+                  location.pathname === "/app/profile"
+                    ? alpha(theme.palette.primary.main, 0.12)
+                    : "transparent",
+                color:
+                  location.pathname === "/app/profile"
+                    ? theme.palette.primary.main
+                    : theme.palette.text.primary,
                 "&:hover": {
                   backgroundColor: alpha(theme.palette.primary.main, 0.08),
                 },
@@ -245,7 +257,10 @@ export default function DashboardLayout() {
               <ListItemIcon sx={{ color: "inherit", minWidth: 40 }}>
                 <Person />
               </ListItemIcon>
-              <ListItemText primary="Profile" primaryTypographyProps={{ fontWeight: 500 }} />
+              <ListItemText
+                primary="Profile"
+                primaryTypographyProps={{ fontWeight: 500 }}
+              />
             </ListItemButton>
           </ListItem>
 
@@ -263,17 +278,19 @@ export default function DashboardLayout() {
               <ListItemIcon sx={{ color: "inherit", minWidth: 40 }}>
                 <Logout />
               </ListItemIcon>
-              <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: 500 }} />
+              <ListItemText
+                primary="Logout"
+                primaryTypographyProps={{ fontWeight: 500 }}
+              />
             </ListItemButton>
           </ListItem>
         </List>
       </Box>
     </Box>
-  )
+  );
 
   return (
     <Box sx={{ display: "flex" }}>
-      {/* App Bar */}
       <AppBar
         position="fixed"
         elevation={0}
@@ -300,10 +317,12 @@ export default function DashboardLayout() {
 
             <Box>
               <Typography variant="h6" fontWeight={600}>
-                {navigationItems.find((item) => item.path === location.pathname)?.label || "Dashboard"}
+                {navigationItems.find((item) => item.path === location.pathname)
+                  ?.label || "Dashboard"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {navigationItems.find((item) => item.path === location.pathname)?.description || "Welcome back"}
+                {navigationItems.find((item) => item.path === location.pathname)
+                  ?.description || "Welcome back"}
               </Typography>
             </Box>
           </Box>
@@ -345,8 +364,10 @@ export default function DashboardLayout() {
         </Toolbar>
       </AppBar>
 
-      {/* Sidebar Drawer */}
-      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+      >
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -386,7 +407,6 @@ export default function DashboardLayout() {
         </Drawer>
       </Box>
 
-      {/* Main Content */}
       <Box
         component="main"
         sx={{
@@ -401,7 +421,6 @@ export default function DashboardLayout() {
         <Outlet />
       </Box>
 
-      {/* Profile Menu */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -410,17 +429,23 @@ export default function DashboardLayout() {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         slotProps={{
-            paper: {
-              sx: {
+          paper: {
+            sx: {
               mt: 1,
               minWidth: 200,
               borderRadius: 2,
               boxShadow: theme.shadows[8],
             },
-          }
+          },
         }}
       >
-        <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
+        <Box
+          sx={{
+            px: 2,
+            py: 1.5,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+          }}
+        >
           <Typography variant="subtitle2" fontWeight={600}>
             {user?.firstName} {user?.lastName}
           </Typography>
@@ -443,5 +468,5 @@ export default function DashboardLayout() {
         </MenuItem>
       </Menu>
     </Box>
-  )
+  );
 }

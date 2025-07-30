@@ -1,4 +1,4 @@
-import toast from "react-hot-toast"
+import toast from "react-hot-toast";
 
 export const showToast = {
   success: (message: string) => {
@@ -10,7 +10,7 @@ export const showToast = {
         color: "#fff",
         fontWeight: "500",
       },
-    })
+    });
   },
 
   error: (message: string) => {
@@ -22,7 +22,7 @@ export const showToast = {
         color: "#fff",
         fontWeight: "500",
       },
-    })
+    });
   },
 
   info: (message: string) => {
@@ -35,7 +35,7 @@ export const showToast = {
         color: "#fff",
         fontWeight: "500",
       },
-    })
+    });
   },
 
   loading: (message: string) => {
@@ -46,10 +46,10 @@ export const showToast = {
         color: "#fff",
         fontWeight: "500",
       },
-    })
+    });
   },
 
   dismiss: (toastId: string) => {
-    toast.dismiss(toastId)
+    toast.dismiss(toastId);
   },
-}
+};

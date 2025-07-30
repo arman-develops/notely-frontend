@@ -1,19 +1,19 @@
-import { Route, Routes } from "react-router-dom"
-import LoginPage from "./pages/LoginPage"
-import SignupPage from "./pages/SignupPage"
-import OnboardingFlow from "./pages/Onboarding"
-import ProtectedRoute from "./components/ProtectedRoutes"
-import DashboardLayout from './layout/DashboardLayout';
-import DashboardPage from "./pages/Dashboard"
-import NewNotePage from "./pages/NewNotePage"
-import AllNotesPage from "./pages/AllNotesPage"
-import ViewNotePage from "./pages/ViewNotePage"
-import TrashPage from "./pages/TrashPage"
-import PinnedNotesPage from "./pages/PinnedNotesPage"
-import BookmarkedNotesPage from "./pages/BookMarkedNotesPage"
-import ProfilePage from "./pages/ProfilePage"
-import LandingPage from "./pages/LandingPage"
-import EditNotePage from "./pages/EditNotesPage"
+import { Route, Routes } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import OnboardingFlow from "./pages/Onboarding";
+import ProtectedRoute from "./components/ProtectedRoutes";
+import DashboardLayout from "./layout/DashboardLayout";
+import DashboardPage from "./pages/Dashboard";
+import NewNotePage from "./pages/NewNotePage";
+import AllNotesPage from "./pages/AllNotesPage";
+import ViewNotePage from "./pages/ViewNotePage";
+import TrashPage from "./pages/TrashPage";
+import PinnedNotesPage from "./pages/PinnedNotesPage";
+import BookmarkedNotesPage from "./pages/BookMarkedNotesPage";
+import ProfilePage from "./pages/ProfilePage";
+import LandingPage from "./pages/LandingPage";
+import EditNotePage from "./pages/EditNotesPage";
 
 function App() {
   return (
@@ -22,12 +22,12 @@ function App() {
       <Route path="/register" element={<SignupPage />} />
       <Route path="/" element={<LandingPage />} />
       <Route
-          path="/app/onboarding"
-          element={
-            <ProtectedRoute>
-              <OnboardingFlow />
-            </ProtectedRoute>
-          }
+        path="/app/onboarding"
+        element={
+          <ProtectedRoute>
+            <OnboardingFlow />
+          </ProtectedRoute>
+        }
       />
       <Route
         path="/app"
@@ -48,7 +48,7 @@ function App() {
         <Route path="profile" element={<ProfilePage />} />
       </Route>
     </Routes>
-  )
+  );
 }
 
-export default App
+export default App;

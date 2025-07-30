@@ -1,6 +1,6 @@
-import type React from "react"
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -16,7 +16,7 @@ import {
   Alert,
   CircularProgress,
   Container,
-} from "@mui/material"
+} from "@mui/material";
 import {
   MoreVert,
   Edit,
@@ -26,50 +26,56 @@ import {
   Visibility,
   PinDropOutlined,
   BookmarkBorderOutlined,
-} from "@mui/icons-material"
-import { useNotesStore } from "../store/NotesStore"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import axiosInstance from "../service/AxiosInstance"
-import { formatDistanceToNow } from "date-fns"
-import { showToast } from "../utils/toast"
+} from "@mui/icons-material";
+import { useNotesStore } from "../store/NotesStore";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axiosInstance from "../service/AxiosInstance";
+import { formatDistanceToNow } from "date-fns";
+import { showToast } from "../utils/toast";
 
 interface NoteCardProps {
   note: {
-    id: string
-    noteID: string
-    noteTitle: string
-    synopsis: string
-    content: string
-    dateCreated: string
-    lastUpdated: string
-    isPinned: boolean
-    isBookMarked: boolean
-  }
-  onEdit: (id: string) => void
-  onDelete: (id: string) => void
-  onView: (id: string) => void
-  onTogglePin: (id: string) => void
-  onToggleBookmark: (id: string) => void
+    id: string;
+    noteID: string;
+    noteTitle: string;
+    synopsis: string;
+    content: string;
+    dateCreated: string;
+    lastUpdated: string;
+    isPinned: boolean;
+    isBookMarked: boolean;
+  };
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+  onView: (id: string) => void;
+  onTogglePin: (id: string) => void;
+  onToggleBookmark: (id: string) => void;
 }
 
-function NoteCard({ note, onEdit, onDelete, onView, onTogglePin, onToggleBookmark }: NoteCardProps) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+function NoteCard({
+  note,
+  onEdit,
+  onDelete,
+  onView,
+  onTogglePin,
+  onToggleBookmark,
+}: NoteCardProps) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleMenuClose = () => {
-    setAnchorEl(null)
-  }
+    setAnchorEl(null);
+  };
 
   const handleAction = (action: () => void) => {
-    action()
-    handleMenuClose()
-  }
+    action();
+    handleMenuClose();
+  };
 
-  // Use noteID if available, fallback to id
-  const noteId = note.noteID || note.id
+  const noteId = note.noteID || note.id;
 
   return (
     <Card
@@ -87,13 +93,27 @@ function NoteCard({ note, onEdit, onDelete, onView, onTogglePin, onToggleBookmar
       }}
     >
       <CardContent sx={{ flexGrow: 1 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-          <Typography variant="h6" component="h2" fontWeight={600} sx={{ flexGrow: 1, mr: 1 }}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          mb={1}
+        >
+          <Typography
+            variant="h6"
+            component="h2"
+            fontWeight={600}
+            sx={{ flexGrow: 1, mr: 1 }}
+          >
             {note.noteTitle}
           </Typography>
           <Box display="flex" alignItems="center" gap={0.5}>
-            {note.isPinned && <PinDropOutlined color="primary" fontSize="small" />}
-            {note.isBookMarked && <BookmarkBorderOutlined color="secondary" fontSize="small" />}
+            {note.isPinned && (
+              <PinDropOutlined color="primary" fontSize="small" />
+            )}
+            {note.isBookMarked && (
+              <BookmarkBorderOutlined color="secondary" fontSize="small" />
+            )}
             <IconButton size="small" onClick={handleMenuOpen}>
               <MoreVert />
             </IconButton>
@@ -133,7 +153,11 @@ function NoteCard({ note, onEdit, onDelete, onView, onTogglePin, onToggleBookmar
           Read More
         </Button>
         <Box display="flex" gap={1}>
-          <IconButton size="small" onClick={() => onTogglePin(noteId)} color={note.isPinned ? "primary" : "default"}>
+          <IconButton
+            size="small"
+            onClick={() => onTogglePin(noteId)}
+            color={note.isPinned ? "primary" : "default"}
+          >
             <PushPin />
           </IconButton>
           <IconButton
@@ -145,7 +169,11 @@ function NoteCard({ note, onEdit, onDelete, onView, onTogglePin, onToggleBookmar
           </IconButton>
         </Box>
       </CardActions>
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
         <MenuItem onClick={() => handleAction(() => onView(noteId))}>
           <Visibility sx={{ mr: 2 }} />
           View
@@ -162,19 +190,30 @@ function NoteCard({ note, onEdit, onDelete, onView, onTogglePin, onToggleBookmar
           <Bookmark sx={{ mr: 2 }} />
           {note.isBookMarked ? "Remove Bookmark" : "Bookmark"}
         </MenuItem>
-        <MenuItem onClick={() => handleAction(() => onDelete(noteId))} sx={{ color: "error.main" }}>
+        <MenuItem
+          onClick={() => handleAction(() => onDelete(noteId))}
+          sx={{ color: "error.main" }}
+        >
           <Delete sx={{ mr: 2 }} />
           Delete
         </MenuItem>
       </Menu>
     </Card>
-  )
+  );
 }
 
 export default function AllNotesPage() {
-  const queryClient = useQueryClient()
-  const navigate = useNavigate()
-  const { notes, setNotes, deleteNote, togglePin, toggleBookmark, setError, error, clearError } = useNotesStore()
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const {
+    setNotes,
+    deleteNote,
+    togglePin,
+    toggleBookmark,
+    setError,
+    error,
+    clearError,
+  } = useNotesStore();
 
   // Fetch notes from backend
   const {
@@ -185,141 +224,136 @@ export default function AllNotesPage() {
   } = useQuery({
     queryKey: ["notes"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/entries")
-      console.log("Fetched notes:", response.data.data.entries)
-      return response.data.data.entries
+      const response = await axiosInstance.get("/entries");
+      return response.data.data.entries;
     },
     retry: 2,
     retryDelay: 1000,
-  })
+  });
 
   // Update store when data is fetched successfully
   useEffect(() => {
     if (notesData) {
-      console.log("Setting notes in store:", notesData)
-      setNotes(notesData)
+      setNotes(notesData);
     }
-  }, [notesData, setNotes])
+  }, [notesData, setNotes]);
 
-  // Handle query errors
   useEffect(() => {
     if (queryError) {
-      setError("Failed to fetch notes. Please try again.")
+      setError("Failed to fetch notes. Please try again.");
     }
-  }, [queryError, setError])
+  }, [queryError, setError]);
 
   // Delete note mutation
   const deleteMutation = useMutation({
     mutationFn: async (noteId: string) => {
-      await axiosInstance.delete(`/entry/${noteId}`)
+      await axiosInstance.delete(`/entry/${noteId}`);
     },
     onSuccess: (_, noteId) => {
-      deleteNote(noteId)
-      // Invalidate and refetch notes
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
+      deleteNote(noteId);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
     },
     onError: (error: any) => {
-      setError(error.response?.data?.message || "Failed to delete note")
+      setError(error.response?.data?.message || "Failed to delete note");
     },
-  })
+  });
 
   // Toggle pin mutation
   const pinMutation = useMutation({
-    mutationFn: async ({ noteId, isPinned }: { noteId: string; isPinned: boolean }) => {
-      console.log("Toggling pin for note with ID:", noteId, "to:", isPinned)
-      const response = await axiosInstance.patch(`/entry/pin/${noteId}`, { isPinned })
-      console.log("Pin response:", response.data)
-      return response.data
+    mutationFn: async ({
+      noteId,
+      isPinned,
+    }: {
+      noteId: string;
+      isPinned: boolean;
+    }) => {
+      const response = await axiosInstance.patch(`/entry/pin/${noteId}`, {
+        isPinned,
+      });
+      return response.data;
     },
-    onSuccess: (data, { noteId }) => {
-      console.log("Pin success for note:", noteId)
-      // Update the local store state
-      togglePin(noteId)
-      // Invalidate and refetch to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
-      clearError()
+    onSuccess: (_data, { noteId }) => {
+      console.log("Pin success for note:", noteId);
+      togglePin(noteId);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      clearError();
     },
     onError: (error: any) => {
-      console.error("Pin error:", error)
-      setError(error.response?.data?.message || "Failed to pin/unpin note")
+      setError(error.response?.data?.message || "Failed to pin/unpin note");
     },
-  })
+  });
 
   // Toggle bookmark mutation
   const bookmarkMutation = useMutation({
-    mutationFn: async ({ noteId, isBookMarked }: { noteId: string; isBookMarked: boolean }) => {
-      console.log("Toggling bookmark for note with ID:", noteId, "to:", isBookMarked)
-      const response = await axiosInstance.patch(`/entry/bookmark/${noteId}`, { isBookMarked })
-      console.log("Bookmark response:", response.data)
-      return response.data
+    mutationFn: async ({
+      noteId,
+      isBookMarked,
+    }: {
+      noteId: string;
+      isBookMarked: boolean;
+    }) => {
+      const response = await axiosInstance.patch(`/entry/bookmark/${noteId}`, {
+        isBookMarked,
+      });
+      console.log("Bookmark response:", response.data);
+      return response.data;
     },
-    onSuccess: (data, { noteId }) => {
-      console.log("Bookmark success for note:", noteId)
-      console.log("Store notes before toggle:", notes)
-      // Update the local store state
-      toggleBookmark(noteId)
-      console.log("Store notes after toggle:", notes)
-      // Invalidate and refetch to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ["notes"] })
-      clearError()
+    onSuccess: (_data, { noteId }) => {
+      toggleBookmark(noteId);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      clearError();
     },
     onError: (error: any) => {
-      console.error("Bookmark error:", error)
-      setError(error.response?.data?.message || "Failed to bookmark/unbookmark note")
+      setError(
+        error.response?.data?.message || "Failed to bookmark/unbookmark note",
+      );
     },
-  })
+  });
 
-  // Get active notes - use notesData as the source of truth, but filter out deleted ones
-  const activeNotes = (notesData || []).filter((note: any) => !note.isDeleted)
+  const activeNotes = (notesData || []).filter((note: any) => !note.isDeleted);
 
   const handleEdit = (id: string) => {
-    navigate(`/app/notes/edit/${id}`)
-  }
+    navigate(`/app/notes/edit/${id}`);
+  };
 
   const handleDelete = (id: string) => {
-    deleteMutation.mutate(id)
-  }
+    deleteMutation.mutate(id);
+  };
 
   const handleView = (id: string) => {
-    navigate(`/app/notes/view/${id}`)
-  }
+    navigate(`/app/notes/view/${id}`);
+  };
 
   const handleTogglePin = (id: string) => {
-    console.log("Toggle pin for note ID:", id)
-    // Find note using either noteID or id field
-    const note = activeNotes.find((n: any) => n.noteID === id || n.id === id)
+    const note = activeNotes.find((n: any) => n.noteID === id || n.id === id);
     if (note) {
-      console.log("Found note for pinning:", note.noteTitle, "Current pin status:", note.isPinned)
-      // Toggle the current state - send the opposite of current state
-      pinMutation.mutate({ noteId: id, isPinned: !note.isPinned })
-      showToast.success("Entry pinned successfully")
+      pinMutation.mutate({ noteId: id, isPinned: !note.isPinned });
+      showToast.success("Entry pinned successfully");
     } else {
-      console.error("Note not found for ID:", id)
-      setError("Note not found")
+      setError("Note not found");
     }
-  }
+  };
 
   const handleToggleBookmark = (id: string) => {
-    console.log("Toggle bookmark for note ID:", id)
-    // Find note using either noteID or id field
-    const note = activeNotes.find((n: any) => n.noteID === id || n.id === id)
+    const note = activeNotes.find((n: any) => n.noteID === id || n.id === id);
     if (note) {
-      console.log("Found note for bookmarking:", note.noteTitle, "Current bookmark status:", note.isBookMarked)
-      console.log("Full note object:", note)
-      // Toggle the current state - send the opposite of current state
-      bookmarkMutation.mutate({ noteId: id, isBookMarked: !note.isBookMarked })
+      bookmarkMutation.mutate({ noteId: id, isBookMarked: !note.isBookMarked });
     } else {
-      console.error("Note not found for ID:", id)
-      setError("Note not found")
+      setError("Note not found");
     }
-  }
+  };
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+      >
         <CircularProgress />
       </Box>
-    )
+    );
   }
 
   if (isError) {
@@ -329,7 +363,7 @@ export default function AllNotesPage() {
           Failed to load notes. Please refresh the page or try again later.
         </Alert>
       </Container>
-    )
+    );
   }
 
   return (
@@ -398,5 +432,5 @@ export default function AllNotesPage() {
         </Grid>
       )}
     </Container>
-  )
+  );
 }

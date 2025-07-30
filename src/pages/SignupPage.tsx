@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { useAuthStore } from "../store/AuthStore"
-import { useState } from "react"
-import type { SignupData } from "../types/SignupData"
-import { validateSignup } from "../utils/validators"
+import type React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/AuthStore";
+import { useState } from "react";
+import type { SignupData } from "../types/SignupData";
+import { validateSignup } from "../utils/validators";
 import {
   Box,
   Card,
@@ -17,30 +17,37 @@ import {
   IconButton,
   Fade,
   Alert,
-} from "@mui/material"
-import { Email, LockOutline, Person, Visibility, VisibilityOff } from "@mui/icons-material"
-import { useMutation } from "@tanstack/react-query"
-import axiosInstance from "../service/AxiosInstance"
+} from "@mui/material";
+import {
+  Email,
+  LockOutline,
+  Person,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
+import { useMutation } from "@tanstack/react-query";
+import axiosInstance from "../service/AxiosInstance";
 
 interface SignupResponse {
   user: {
-    id: string
-    firstName: string
-    lastName: string
-    username: string
-    email: string
-    hasCompletedOnboarding: boolean
-    preferences?: string[]
-    bio?: string
-    avatar?: string
-  }
-  jwt_token: string
-  message?: string
+    id: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    hasCompletedOnboarding: boolean;
+    preferences?: string[];
+    bio?: string;
+    avatar?: string;
+    dateJoined: Date;
+  };
+  jwt_token: string;
+  message?: string;
 }
 
 export default function SignupPage() {
-  const navigate = useNavigate()
-  const { setAuth, setError, setLoading, error, clearError } = useAuthStore()
+  const navigate = useNavigate();
+  const { setAuth, setError, setLoading, error, clearError } = useAuthStore();
 
   const [formData, setFormData] = useState<SignupData>({
     firstName: "",
@@ -48,99 +55,85 @@ export default function SignupPage() {
     username: "",
     email: "",
     password: "",
-  })
+  });
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState<Partial<SignupData>>({})
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<Partial<SignupData>>({});
 
   const signupMutation = useMutation({
     mutationFn: async (data: SignupData): Promise<SignupResponse> => {
-      const response = await axiosInstance.post("/auth/register", data)
-      return response.data.data
+      const response = await axiosInstance.post("/auth/register", data);
+      return response.data.data;
     },
     onMutate: () => {
-      // Set loading state when mutation starts
-      setLoading(true)
-      clearError()
+      setLoading(true);
+      clearError();
     },
     onSuccess: (data: SignupResponse) => {
-      console.log("Signup successful:", data)
+      setAuth(data.user, data.jwt_token);
 
-      // Store auth data in Zustand store
-      setAuth(data.user, data.jwt_token)
+      localStorage.setItem("auth-token", data.jwt_token);
 
-      // Optional: Store token in localStorage for axios interceptors
-      localStorage.setItem("auth-token", data.jwt_token)
-
-      // Always navigate to onboarding for new users
-      // (hasCompletedOnboarding should be false for new signups)
-      navigate("/app/onboarding")
+      navigate("/app/onboarding");
     },
     onError: (error: any) => {
-      console.error("Signup error:", error)
+      console.error("Signup error:", error);
 
-      // Handle different types of errors
-      let errorMessage = "Signup failed. Please try again."
+      let errorMessage = "Signup failed. Please try again.";
 
       if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
+        errorMessage = error.response.data.message;
       } else if (error.response?.data?.errors) {
-        // Handle validation errors from backend
-        const backendErrors = error.response.data.errors
+        const backendErrors = error.response.data.errors;
         if (Array.isArray(backendErrors)) {
-          errorMessage = backendErrors.join(", ")
+          errorMessage = backendErrors.join(", ");
         } else if (typeof backendErrors === "object") {
-          // Handle field-specific errors
-          const fieldErrors: Partial<SignupData> = {}
+          const fieldErrors: Partial<SignupData> = {};
           Object.keys(backendErrors).forEach((field) => {
             if (field in formData) {
-              fieldErrors[field as keyof SignupData] = backendErrors[field]
+              fieldErrors[field as keyof SignupData] = backendErrors[field];
             }
-          })
-          setErrors(fieldErrors)
-          errorMessage = "Please fix the errors below."
+          });
+          setErrors(fieldErrors);
+          errorMessage = "Please fix the errors below.";
         }
       } else if (error.response?.status === 409) {
-        errorMessage = "Email or username already exists. Please try different credentials."
+        errorMessage =
+          "Email or username already exists. Please try different credentials.";
       } else if (error.response?.status === 400) {
-        errorMessage = "Invalid data provided. Please check your information."
+        errorMessage = "Invalid data provided. Please check your information.";
       } else if (error.response?.status >= 500) {
-        errorMessage = "Server error. Please try again later."
+        errorMessage = "Server error. Please try again later.";
       } else if (error.message === "Network Error") {
-        errorMessage = "Network error. Please check your connection."
+        errorMessage = "Network error. Please check your connection.";
       }
 
-      setError(errorMessage)
-      setLoading(false)
+      setError(errorMessage);
+      setLoading(false);
     },
     onSettled: () => {
-      // Always set loading to false when mutation completes
-      setLoading(false)
+      setLoading(false);
     },
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // Validate form data
-    if (!validateSignup({ formData, setErrors })) return
+    if (!validateSignup({ formData, setErrors })) return;
 
-    // Clear any existing errors
-    clearError()
-    setErrors({})
+    clearError();
+    setErrors({});
+    signupMutation.mutate(formData);
+  };
 
-    // Execute the signup mutation
-    signupMutation.mutate(formData)
-  }
+  const handleChange =
+    (field: keyof SignupData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleChange = (field: keyof SignupData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }))
-
-    // Clear field-specific errors when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
-    }
-  }
+      if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: undefined }));
+      }
+    };
 
   return (
     <Box
@@ -321,7 +314,9 @@ export default function SignupPage() {
                   },
                 }}
               >
-                {signupMutation.isPending ? "Creating Account..." : "Create Account"}
+                {signupMutation.isPending
+                  ? "Creating Account..."
+                  : "Create Account"}
               </Button>
 
               <Box textAlign="center">
@@ -346,5 +341,5 @@ export default function SignupPage() {
         </Card>
       </Fade>
     </Box>
-  )
+  );
 }

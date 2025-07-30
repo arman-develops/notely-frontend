@@ -1,98 +1,105 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Box, Card, CardContent, Stepper, Step, StepLabel, Fade, Slide } from "@mui/material"
-import { useAuthStore } from "../store/AuthStore"
-import WelcomeStep from "../components/onboarding/Welcome"
-import PreferencesStep from "../components/onboarding/Preferences"
-import ProfileStep from "../components/onboarding/ProfileSetup"
-import FirstNoteStep from "../components/onboarding/FirstNote"
-import { useMutation } from "@tanstack/react-query"
-import axiosInstance from "../service/AxiosInstance"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Card,
+  CardContent,
+  Stepper,
+  Step,
+  StepLabel,
+  Fade,
+  Slide,
+} from "@mui/material";
+import { useAuthStore } from "../store/AuthStore";
+import WelcomeStep from "../components/onboarding/Welcome";
+import PreferencesStep from "../components/onboarding/Preferences";
+import ProfileStep from "../components/onboarding/ProfileSetup";
+import FirstNoteStep from "../components/onboarding/FirstNote";
+import { useMutation } from "@tanstack/react-query";
+import axiosInstance from "../service/AxiosInstance";
 
-const steps = ["Welcome", "Profile", "Preferences", "First Note"]
+const steps = ["Welcome", "Profile", "Preferences", "First Note"];
 
 interface OnboardingData {
-  bio?: string
-  avatar?: string
-  preferences: string[]
+  bio?: string;
+  avatar?: string;
+  preferences: string[];
   firstNote?: {
-    title: string
-    content: string
-    category: string
-  }
+    title: string;
+    content: string;
+    category: string;
+  };
 }
 
 interface OnboardingResponse {
   user: {
-    id: string
-    firstName: string
-    lastName: string
-    username: string
-    email: string
-    preferences: string[]
-    hasCompletedOnboarding: boolean
-    bio?: string
-    avatar?: string
-  }
-  message?: string
+    id: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    preferences: string[];
+    hasCompletedOnboarding: boolean;
+    bio?: string;
+    avatar?: string;
+  };
+  message?: string;
 }
 
 export default function OnboardingFlow() {
-  const navigate = useNavigate()
-  const { user, updateUser, setError, setLoading, clearError } = useAuthStore()
+  const navigate = useNavigate();
+  const { user, updateUser, setError, setLoading, clearError } = useAuthStore();
 
-  const [activeStep, setActiveStep] = useState(0)
-  const [preferences, setPreferences] = useState<string[]>([])
+  const [activeStep, setActiveStep] = useState(0);
+  const [preferences, setPreferences] = useState<string[]>([]);
   const [profileData, setProfileData] = useState({
     bio: "",
     avatar: "",
-  })
+  });
   const [firstNote, setFirstNote] = useState({
     title: "",
     content: "",
     category: "",
-    synopsis: ""
-  })
+    synopsis: "",
+  });
 
   const completeOnboardingMutation = useMutation({
     mutationFn: async (data: OnboardingData): Promise<OnboardingResponse> => {
-      const response = await axiosInstance.patch("/auth/onboarding", data)
-      return response.data.data
+      const response = await axiosInstance.patch("/auth/onboarding", data);
+      return response.data.data;
     },
     onMutate: () => {
-      setLoading(true)
-      clearError()
+      setLoading(true);
+      clearError();
     },
     onSuccess: (data: OnboardingResponse) => {
-      console.log("Onboarding complete", data)
       updateUser({
         ...data.user,
-        hasCompletedOnboarding: true
-      })
-      navigate("/app/dashboard")
+        hasCompletedOnboarding: true,
+      });
+      navigate("/app/dashboard");
     },
     onError: (error: any) => {
-      console.error("Onboarding completion error:", error)
-
-      let errorMessage = "Failed to complete onboarding. Please try again."
+      let errorMessage = "Failed to complete onboarding. Please try again.";
 
       if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
+        errorMessage = error.response.data.message;
       } else if (error.response?.status === 400) {
-        errorMessage = "Invalid onboarding data. Please check your information."
+        errorMessage =
+          "Invalid onboarding data. Please check your information.";
       } else if (error.response?.status >= 500) {
-        errorMessage = "Server error. Please try again later."
+        errorMessage = "Server error. Please try again later.";
       } else if (error.message === "Network Error") {
-        errorMessage = "Network error. Please check your connection."
+        errorMessage = "Network error. Please check your connection.";
       }
 
-      setError(errorMessage)
-      setLoading(false)
+      setError(errorMessage);
+      setLoading(false);
     },
     onSettled: () => {
-      setLoading(false)
+      setLoading(false);
     },
-  })
+  });
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
@@ -101,22 +108,22 @@ export default function OnboardingFlow() {
         bio: profileData.bio,
         avatar: profileData.avatar,
         preferences,
-        firstNote: firstNote.title && firstNote.content ? firstNote: undefined
-      }
-      completeOnboardingMutation.mutate(onboardingData)
+        firstNote: firstNote.title && firstNote.content ? firstNote : undefined,
+      };
+      completeOnboardingMutation.mutate(onboardingData);
     } else {
-      setActiveStep((prev) => prev + 1)
+      setActiveStep((prev) => prev + 1);
     }
-  }
+  };
 
   const handleBack = () => {
-    setActiveStep((prev) => prev - 1)
-  }
+    setActiveStep((prev) => prev - 1);
+  };
 
   const renderStep = () => {
     switch (activeStep) {
       case 0:
-        return <WelcomeStep user={user} onNext={handleNext} />
+        return <WelcomeStep user={user} onNext={handleNext} />;
       case 1:
         return (
           <ProfileStep
@@ -125,7 +132,7 @@ export default function OnboardingFlow() {
             onNext={handleNext}
             onBack={handleBack}
           />
-        )
+        );
       case 2:
         return (
           <PreferencesStep
@@ -134,7 +141,7 @@ export default function OnboardingFlow() {
             onNext={handleNext}
             onBack={handleBack}
           />
-        )
+        );
       case 3:
         return (
           <FirstNoteStep
@@ -144,11 +151,11 @@ export default function OnboardingFlow() {
             onBack={handleBack}
             isLoading={completeOnboardingMutation.isPending}
           />
-        )
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <Box
@@ -190,5 +197,5 @@ export default function OnboardingFlow() {
         </Card>
       </Fade>
     </Box>
-  )
+  );
 }

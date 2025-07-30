@@ -1,79 +1,90 @@
-import type React from "react"
-import { useState } from "react"
-import { Box, Typography, TextField, Button, Avatar, IconButton, Alert } from "@mui/material"
-import { PhotoCamera, Person, CloudUpload } from "@mui/icons-material"
-import { CLOUDINARY_URL, UPLOAD_PRESET } from "../../service/Cloudinary"
-import axios from "axios"
+import type React from "react";
+import { useState } from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Avatar,
+  IconButton,
+  Alert,
+} from "@mui/material";
+import { PhotoCamera, Person, CloudUpload } from "@mui/icons-material";
+import { CLOUDINARY_URL, UPLOAD_PRESET } from "../../service/Cloudinary";
+import axios from "axios";
 
 interface ProfileData {
-  bio: string
-  avatar: string
+  bio: string;
+  avatar: string;
 }
 
 interface ProfileStepProps {
-  profileData: ProfileData
-  onProfileChange: (data: ProfileData) => void
-  onNext: () => void
-  onBack: () => void
+  profileData: ProfileData;
+  onProfileChange: (data: ProfileData) => void;
+  onNext: () => void;
+  onBack: () => void;
 }
 
-export default function ProfileStep({ profileData, onProfileChange, onNext, onBack }: ProfileStepProps) {
-  const [uploadError, setUploadError] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
+export default function ProfileStep({
+  profileData,
+  onProfileChange,
+  onNext,
+  onBack,
+}: ProfileStepProps) {
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleChange = (field: keyof ProfileData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    onProfileChange({ ...profileData, [field]: e.target.value })
-  }
+  const handleChange =
+    (field: keyof ProfileData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      onProfileChange({ ...profileData, [field]: e.target.value });
+    };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setUploadError('Please select a valid image file')
-      return
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please select a valid image file");
+      return;
     }
 
-    // Validate file size (e.g., 5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError('File size must be less than 5MB')
-      return
+      setUploadError("File size must be less than 5MB");
+      return;
     }
 
-    setIsUploading(true)
-    setUploadError(null)
+    setIsUploading(true);
+    setUploadError(null);
 
-    const formDataUpload = new FormData()
-    formDataUpload.append("file", file)
-    formDataUpload.append("upload_preset", UPLOAD_PRESET)
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+    formDataUpload.append("upload_preset", UPLOAD_PRESET);
 
     try {
-      const res = await axios.post(CLOUDINARY_URL, formDataUpload)
-      const imageURL = res.data.secure_url
-      
-      // Update the profile data with the new avatar URL
-      onProfileChange({ ...profileData, avatar: imageURL })
-      
-      console.log("Avatar uploaded successfully:", imageURL)
+      const res = await axios.post(CLOUDINARY_URL, formDataUpload);
+      const imageURL = res.data.secure_url;
+
+      onProfileChange({ ...profileData, avatar: imageURL });
+
+      console.log("Avatar uploaded successfully:", imageURL);
     } catch (err: any) {
-      console.error("Upload failed", err)
-      
-      let errorMessage = "Failed to upload avatar. Please try again."
-      
+      console.error("Upload failed", err);
+
+      let errorMessage = "Failed to upload avatar. Please try again.";
+
       if (err.response?.data?.error?.message) {
-        errorMessage = err.response.data.error.message
+        errorMessage = err.response.data.error.message;
       } else if (err.response?.status === 400) {
-        errorMessage = "Invalid file format. Please choose a valid image."
+        errorMessage = "Invalid file format. Please choose a valid image.";
       } else if (err.message === "Network Error") {
-        errorMessage = "Network error. Please check your connection."
+        errorMessage = "Network error. Please check your connection.";
       }
-      
-      setUploadError(errorMessage)
+
+      setUploadError(errorMessage);
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   return (
     <Box py={2}>
@@ -87,7 +98,11 @@ export default function ProfileStep({ profileData, onProfileChange, onNext, onBa
       </Box>
 
       {uploadError && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setUploadError(null)}>
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+          onClose={() => setUploadError(null)}
+        >
           {uploadError}
         </Alert>
       )}
@@ -99,7 +114,9 @@ export default function ProfileStep({ profileData, onProfileChange, onNext, onBa
             sx={{
               width: 100,
               height: 100,
-              background: profileData.avatar ? "transparent" : "linear-gradient(45deg, #6366f1, #8b5cf6)",
+              background: profileData.avatar
+                ? "transparent"
+                : "linear-gradient(45deg, #6366f1, #8b5cf6)",
             }}
           >
             {!profileData.avatar && <Person sx={{ fontSize: 50 }} />}
@@ -146,7 +163,7 @@ export default function ProfileStep({ profileData, onProfileChange, onNext, onBa
         placeholder="I'm passionate about... I love to write about... My interests include..."
         sx={{ mb: 4 }}
         helperText="This helps us suggest relevant note categories and features"
-        inputProps={{ maxLength: 500 }}
+        slotProps={{ htmlInput: { maxLength: 500 } }}
       />
 
       <Box display="flex" gap={2} justifyContent="space-between">
@@ -168,5 +185,5 @@ export default function ProfileStep({ profileData, onProfileChange, onNext, onBa
         </Button>
       </Box>
     </Box>
-  )
+  );
 }

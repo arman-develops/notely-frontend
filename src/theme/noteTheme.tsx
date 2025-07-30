@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material"
+import { createTheme } from "@mui/material";
 
 export const noteTheme = createTheme({
   palette: {
@@ -29,4 +29,4 @@ export const noteTheme = createTheme({
   shape: {
     borderRadius: 12,
   },
-})
+});

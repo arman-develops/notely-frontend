@@ -1,5 +1,5 @@
-import type React from "react"
-import { useState, useEffect } from "react"
+import type React from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ import {
   Tooltip,
   Fade,
   Paper,
-} from "@mui/material"
+} from "@mui/material";
 import {
   Psychology,
   SentimentVeryDissatisfied,
@@ -21,77 +21,84 @@ import {
   SentimentVerySatisfied,
   Refresh,
   AutoAwesome,
-} from "@mui/icons-material"
-import { googleAIService, type SentimentAnalysis } from "../../service/Google-ai"
+} from "@mui/icons-material";
+import {
+  googleAIService,
+  type SentimentAnalysis,
+} from "../../service/Google-ai";
 
 interface AIAnalysisProps {
-  text: string
-  title?: string
-  autoAnalyze?: boolean
+  text: string;
+  title: string;
+  autoAnalyze?: boolean;
 }
 
-const AIAnalysis: React.FC<AIAnalysisProps> = ({ text, title, autoAnalyze = false }) => {
-  const [analysis, setAnalysis] = useState<SentimentAnalysis | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+const AIAnalysis: React.FC<AIAnalysisProps> = ({
+  text,
+  title,
+  autoAnalyze = false,
+}) => {
+  const [analysis, setAnalysis] = useState<SentimentAnalysis | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const analyzeSentiment = async () => {
     if (!text.trim()) {
-      setError("No text to analyze")
-      return
+      setError("No text to analyze");
+      return;
     }
 
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const result = await googleAIService.analyzeSentiment(text)
-      setAnalysis(result)
+      const result = await googleAIService.analyzeSentiment({ text, title });
+      setAnalysis(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Analysis failed")
+      setError(err instanceof Error ? err.message : "Analysis failed");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (autoAnalyze && text.trim() && googleAIService.isConfigured()) {
       // Debounce the analysis
       const timer = setTimeout(() => {
-        analyzeSentiment()
-      }, 1000)
+        analyzeSentiment();
+      }, 1000);
 
-      return () => clearTimeout(timer)
+      return () => clearTimeout(timer);
     }
-  }, [text, autoAnalyze])
+  }, [text, autoAnalyze]);
 
   const getSentimentIcon = (sentiment: string) => {
     switch (sentiment) {
       case "positive":
-        return <SentimentVerySatisfied sx={{ color: "#4caf50" }} />
+        return <SentimentVerySatisfied sx={{ color: "#4caf50" }} />;
       case "negative":
-        return <SentimentVeryDissatisfied sx={{ color: "#f44336" }} />
+        return <SentimentVeryDissatisfied sx={{ color: "#f44336" }} />;
       default:
-        return <SentimentNeutral sx={{ color: "#ff9800" }} />
+        return <SentimentNeutral sx={{ color: "#ff9800" }} />;
     }
-  }
+  };
 
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
       case "positive":
-        return "#4caf50"
+        return "#4caf50";
       case "negative":
-        return "#f44336"
+        return "#f44336";
       default:
-        return "#ff9800"
+        return "#ff9800";
     }
-  }
+  };
 
   const getScoreColor = (score: number) => {
-    if (score > 0.3) return "#4caf50"
-    if (score < -0.3) return "#f44336"
-    return "#ff9800"
-  }
+    if (score > 0.3) return "#4caf50";
+    if (score < -0.3) return "#f44336";
+    return "#ff9800";
+  };
 
   if (!googleAIService.isConfigured()) {
     return (
@@ -99,12 +106,13 @@ const AIAnalysis: React.FC<AIAnalysisProps> = ({ text, title, autoAnalyze = fals
         <CardContent>
           <Alert severity="info">
             <Typography variant="body2">
-              AI Analysis is not configured. Add your Google AI API key to enable sentiment analysis.
+              AI Analysis is not configured. Add your Google AI API key to
+              enable sentiment analysis.
             </Typography>
           </Alert>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -131,7 +139,12 @@ const AIAnalysis: React.FC<AIAnalysisProps> = ({ text, title, autoAnalyze = fals
       />
 
       <CardContent>
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={2}
+        >
           <Box display="flex" alignItems="center" gap={1}>
             <AutoAwesome />
             <Typography variant="h6" fontWeight={600}>
@@ -140,7 +153,11 @@ const AIAnalysis: React.FC<AIAnalysisProps> = ({ text, title, autoAnalyze = fals
           </Box>
 
           <Tooltip title="Analyze sentiment">
-            <IconButton onClick={analyzeSentiment} disabled={isLoading || !text.trim()} sx={{ color: "white" }}>
+            <IconButton
+              onClick={analyzeSentiment}
+              disabled={isLoading || !text.trim()}
+              sx={{ color: "white" }}
+            >
               <Refresh />
             </IconButton>
           </Tooltip>
@@ -154,7 +171,10 @@ const AIAnalysis: React.FC<AIAnalysisProps> = ({ text, title, autoAnalyze = fals
         )}
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2, backgroundColor: "rgba(244, 67, 54, 0.1)" }}>
+          <Alert
+            severity="error"
+            sx={{ mb: 2, backgroundColor: "rgba(244, 67, 54, 0.1)" }}
+          >
             {error}
           </Alert>
         )}
@@ -166,7 +186,9 @@ const AIAnalysis: React.FC<AIAnalysisProps> = ({ text, title, autoAnalyze = fals
                 {getSentimentIcon(analysis.sentiment)}
                 <Box flexGrow={1}>
                   <Typography variant="body1" fontWeight={500} mb={1}>
-                    Sentiment: {analysis.sentiment.charAt(0).toUpperCase() + analysis.sentiment.slice(1)}
+                    Sentiment:{" "}
+                    {analysis.sentiment.charAt(0).toUpperCase() +
+                      analysis.sentiment.slice(1)}
                   </Typography>
 
                   <Box display="flex" alignItems="center" gap={2}>
@@ -199,7 +221,10 @@ const AIAnalysis: React.FC<AIAnalysisProps> = ({ text, title, autoAnalyze = fals
                   backdropFilter: "blur(10px)",
                 }}
               >
-                <Typography variant="body2" sx={{ fontStyle: "italic", color: "#fff" }}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontStyle: "italic", color: "#fff" }}
+                >
                   "{analysis.summary}"
                 </Typography>
               </Paper>
@@ -236,7 +261,7 @@ const AIAnalysis: React.FC<AIAnalysisProps> = ({ text, title, autoAnalyze = fals
         )}
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default AIAnalysis
+export default AIAnalysis;

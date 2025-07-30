@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
+import type React from "react";
+import { useState } from "react";
 import {
   Alert,
   Box,
@@ -14,116 +14,130 @@ import {
   InputAdornment,
   TextField,
   Typography,
-} from "@mui/material"
-import { EmailOutlined, LockOutlined, Visibility, VisibilityOff } from "@mui/icons-material"
-import type { AuthTypes } from "../types/authTypes"
-import { Link, useNavigate } from "react-router-dom"
-import { useAuthStore } from "../store/AuthStore"
-import { validateLogin } from "../utils/validators"
-import { useMutation } from "@tanstack/react-query"
-import axiosInstance from "../service/AxiosInstance"
+} from "@mui/material";
+import {
+  EmailOutlined,
+  LockOutlined,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
+import type { AuthTypes } from "../types/authTypes";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/AuthStore";
+import { validateLogin } from "../utils/validators";
+import { useMutation } from "@tanstack/react-query";
+import axiosInstance from "../service/AxiosInstance";
 
 interface LoginResponse {
   user: {
-    id: string
-    firstName: string
-    lastName: string
-    username: string
-    email: string
-    preferences?: string[]
-    hasCompletedOnboarding?: boolean
-    bio?: string
-    avatar?: string
-  }
-  jwt_token: string
+    id: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    preferences?: string[];
+    hasCompletedOnboarding?: boolean;
+    bio?: string;
+    avatar?: string;
+    dateJoined: Date;
+  };
+  jwt_token: string;
 }
 
 export default function LoginPage() {
-  const { setAuth, setError, setLoading, error, clearError } = useAuthStore()
-  const navigate = useNavigate()
+  const { setAuth, setError, setLoading, error, clearError } = useAuthStore();
+  const navigate = useNavigate();
 
-  const [formData, setFormData] = useState<{ identifier: string; password: string }>({
+  const [formData, setFormData] = useState<{
+    identifier: string;
+    password: string;
+  }>({
     identifier: "",
     password: "",
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState<AuthTypes>({})
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<AuthTypes>({});
 
   const loginMutation = useMutation({
-    mutationFn: async (data: { identifier: string; password: string }): Promise<LoginResponse> => {
-      const response = await axiosInstance.post("/auth/login", data)
-      return response.data.data
+    mutationFn: async (data: {
+      identifier: string;
+      password: string;
+    }): Promise<LoginResponse> => {
+      const response = await axiosInstance.post("/auth/login", data);
+      return response.data.data;
     },
     onMutate: () => {
       // Set loading state when mutation starts
-      setLoading(true)
-      clearError()
+      setLoading(true);
+      clearError();
     },
     onSuccess: (data: LoginResponse) => {
       // console.log("Login successful:", data)
 
       // Store auth data in Zustand store
-      setAuth(data.user, data.jwt_token)
+      setAuth(data.user, data.jwt_token);
 
       // Optional: Store token in localStorage for axios interceptors
-      localStorage.setItem("auth-token", data.jwt_token)
+      localStorage.setItem("auth-token", data.jwt_token);
 
       // // Navigate based on onboarding status
       if (data.user?.hasCompletedOnboarding) {
-        navigate("/app/dashboard")
+        navigate("/app/dashboard");
       } else {
-        navigate("/app/onboarding")
+        navigate("/app/onboarding");
       }
       // navigate("/app/dashboard")
     },
     onError: (error: any) => {
-      console.error("Login error:", error)
+      console.error("Login error:", error);
 
       // Handle different types of errors
-      let errorMessage = "Login failed. Please try again."
+      let errorMessage = "Login failed. Please try again.";
 
       if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
+        errorMessage = error.response.data.message;
       } else if (error.response?.status === 401) {
-        errorMessage = "Invalid email/username or password."
+        errorMessage = "Invalid email/username or password.";
       } else if (error.response?.status === 404) {
-        errorMessage = "User not found. Please check your credentials."
+        errorMessage = "User not found. Please check your credentials.";
       } else if (error.response?.status >= 500) {
-        errorMessage = "Server error. Please try again later."
+        errorMessage = "Server error. Please try again later.";
       } else if (error.message === "Network Error") {
-        errorMessage = "Network error. Please check your connection."
+        errorMessage = "Network error. Please check your connection.";
       }
 
-      setError(errorMessage)
-      setLoading(false)
+      setError(errorMessage);
+      setLoading(false);
     },
     onSettled: () => {
       // Always set loading to false when mutation completes
-      setLoading(false)
+      setLoading(false);
     },
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Validate form data
-    if (!validateLogin({ formData, setErrors })) return
+    if (!validateLogin({ formData, setErrors })) return;
 
     // Clear any existing errors
-    clearError()
+    clearError();
 
     // Execute the login mutation
-    loginMutation.mutate(formData)
-  }
+    loginMutation.mutate(formData);
+  };
 
-  const handleChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+  const handleChange =
+    (field: keyof typeof formData) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
 
-    // Clear field-specific errors when user starts typing
-    if (errors[field]) {
-      setErrors((prev: any) => ({ ...prev, [field]: undefined }))
-    }
-  }
+      // Clear field-specific errors when user starts typing
+      if (errors[field]) {
+        setErrors((prev: any) => ({ ...prev, [field]: undefined }));
+      }
+    };
 
   return (
     <>
@@ -278,7 +292,9 @@ export default function LoginPage() {
                         textDecoration: "none",
                         fontWeight: 600,
                         color: "#6366f1",
-                        pointerEvents: loginMutation.isPending ? "none" : "auto",
+                        pointerEvents: loginMutation.isPending
+                          ? "none"
+                          : "auto",
                         opacity: loginMutation.isPending ? 0.6 : 1,
                       }}
                     >
@@ -292,5 +308,5 @@ export default function LoginPage() {
         </Fade>
       </Box>
     </>
-  )
+  );
 }

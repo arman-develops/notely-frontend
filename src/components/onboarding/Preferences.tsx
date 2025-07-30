@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Chip, Grid } from "@mui/material"
+import { Box, Typography, Button, Chip, Grid } from "@mui/material";
 import {
   Flight,
   Computer,
@@ -12,13 +12,18 @@ import {
   Favorite,
   MusicNote,
   Camera,
-} from "@mui/icons-material"
+} from "@mui/icons-material";
 
 const preferenceOptions = [
   { id: "travel", label: "Travel", icon: Flight, color: "#3b82f6" },
   { id: "tech", label: "Technology", icon: Computer, color: "#8b5cf6" },
   { id: "food", label: "Food & Cooking", icon: Restaurant, color: "#f59e0b" },
-  { id: "fitness", label: "Health & Fitness", icon: FitnessCenter, color: "#10b981" },
+  {
+    id: "fitness",
+    label: "Health & Fitness",
+    icon: FitnessCenter,
+    color: "#10b981",
+  },
   { id: "books", label: "Books & Reading", icon: Book, color: "#ef4444" },
   { id: "art", label: "Art & Design", icon: Palette, color: "#f97316" },
   { id: "business", label: "Business", icon: Business, color: "#6366f1" },
@@ -27,23 +32,28 @@ const preferenceOptions = [
   { id: "personal", label: "Personal", icon: Favorite, color: "#ef4444" },
   { id: "music", label: "Music", icon: MusicNote, color: "#8b5cf6" },
   { id: "photography", label: "Photography", icon: Camera, color: "#6366f1" },
-]
+];
 
 type PreferencesStepProps = {
-  preferences: string[]
-  onPreferencesChange: (preferences: string[]) => void
-  onNext: () => void
-  onBack: () => void
-}
+  preferences: string[];
+  onPreferencesChange: (preferences: string[]) => void;
+  onNext: () => void;
+  onBack: () => void;
+};
 
-export default function PreferencesStep({ preferences, onPreferencesChange, onNext, onBack }: PreferencesStepProps) {
+export default function PreferencesStep({
+  preferences,
+  onPreferencesChange,
+  onNext,
+  onBack,
+}: PreferencesStepProps) {
   const handleTogglePreference = (preferenceId: string) => {
     if (preferences.includes(preferenceId)) {
-      onPreferencesChange(preferences.filter((p) => p !== preferenceId))
+      onPreferencesChange(preferences.filter((p) => p !== preferenceId));
     } else {
-      onPreferencesChange([...preferences, preferenceId])
+      onPreferencesChange([...preferences, preferenceId]);
     }
-  }
+  };
 
   return (
     <Box py={2}>
@@ -52,17 +62,18 @@ export default function PreferencesStep({ preferences, onPreferencesChange, onNe
           What interests you?
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Select topics you'd like to write about. This helps us organize your notes better.
+          Select topics you'd like to write about. This helps us organize your
+          notes better.
         </Typography>
       </Box>
 
       <Grid container spacing={2} mb={4}>
         {preferenceOptions.map((option) => {
-          const IconComponent = option.icon
-          const isSelected = preferences.includes(option.id)
+          const IconComponent = option.icon;
+          const isSelected = preferences.includes(option.id);
 
           return (
-            <Grid size={{xs:6, sm:4}} key={option.id}>
+            <Grid size={{ xs: 6, sm: 4 }} key={option.id}>
               <Chip
                 icon={<IconComponent />}
                 label={option.label}
@@ -76,18 +87,21 @@ export default function PreferencesStep({ preferences, onPreferencesChange, onNe
                   color: isSelected ? "white" : option.color,
                   borderColor: option.color,
                   "&:hover": {
-                    backgroundColor: isSelected ? option.color : `${option.color}20`,
+                    backgroundColor: isSelected
+                      ? option.color
+                      : `${option.color}20`,
                   },
                 }}
               />
             </Grid>
-          )
+          );
         })}
       </Grid>
 
       <Box textAlign="center" mb={3}>
         <Typography variant="body2" color="text.secondary">
-          Selected: {preferences.length} {preferences.length === 1 ? "topic" : "topics"}
+          Selected: {preferences.length}{" "}
+          {preferences.length === 1 ? "topic" : "topics"}
         </Typography>
       </Box>
 
@@ -111,5 +125,5 @@ export default function PreferencesStep({ preferences, onPreferencesChange, onNe
         </Button>
       </Box>
     </Box>
-  )
+  );
 }

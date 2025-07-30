@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from "axios";
 
 const axiosInstance = axios.create({
   // baseURL: "https://notely-backend-p9e5.onrender.com/api",
@@ -7,38 +7,35 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-})
+});
 
 // Request interceptor to add auth token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("auth-token")
+    const token = localStorage.getItem("auth-token");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
+    return config;
   },
   (error) => {
-    return Promise.reject(error)
+    return Promise.reject(error);
   },
-)
+);
 
-// Response interceptor to handle common errors
 axiosInstance.interceptors.response.use(
   (response) => {
-    return response
+    return response;
   },
   (error) => {
     // Handle 401 errors (unauthorized)
     if (error.response?.status === 401) {
-      // Clear stored auth data
-      localStorage.removeItem("auth-token")
-      // Redirect to login page
-      window.location.href = "/login"
+      localStorage.removeItem("auth-token");
+      window.location.href = "/login";
     }
 
-    return Promise.reject(error)
+    return Promise.reject(error);
   },
-)
+);
 
-export default axiosInstance
+export default axiosInstance;
