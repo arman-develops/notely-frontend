@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  // baseURL: "https://notely-backend-p9e5.onrender.com/api",
-  baseURL: "http://localhost:3500/api",
+  baseURL: "https://notely-backend-p9e5.onrender.com/api",
+  // baseURL: "http://localhost:3500/api",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
