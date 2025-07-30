@@ -49,6 +49,8 @@ import { useNotesStore } from "../store/NotesStore"
 import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "../service/AxiosInstance"
 import { format } from "date-fns"
+import axios from "axios"
+import { CLOUDINARY_URL, UPLOAD_PRESET } from "../service/Cloudinary"
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -75,6 +77,7 @@ export default function ProfilePage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
 
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -116,15 +119,16 @@ export default function ProfilePage() {
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof profileForm) => {
-      const response = await axiosInstance.put("/user/profile", data)
-      return response.data
+      const response = await axiosInstance.patch("/user", data)
+      return response.data.data.updatedUser
     },
     onSuccess: (data) => {
-      updateUser(data.user)
+      updateUser(data)
       setIsEditing(false)
       clearError()
     },
     onError: (error: any) => {
+      // console.log(error)
       if (error.response?.data?.errors) {
         setProfileErrors(error.response.data.errors)
       } else {
@@ -136,11 +140,11 @@ export default function ProfilePage() {
   // Update password mutation
   const updatePasswordMutation = useMutation({
     mutationFn: async (data: typeof passwordForm) => {
-      const response = await axiosInstance.put("/user/password", {
+      const response = await axiosInstance.post("/auth/password", {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       })
-      return response.data
+      return response.data.data.updatedUser
     },
     onSuccess: () => {
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
@@ -157,20 +161,18 @@ export default function ProfilePage() {
   })
 
   // Avatar upload mutation
-  const uploadAvatarMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData()
-      formData.append("avatar", file)
-      const response = await axiosInstance.post("/user/avatar", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      return response.data
+  const updateAvatarMutation = useMutation({
+    mutationFn: async (avatarURL: string) => {
+      const response = await axiosInstance.patch("/user", { avatar: avatarURL })
+      return response.data.data.updatedUser
     },
     onSuccess: (data) => {
-      updateUser({ avatar: data.avatarUrl })
+      updateUser({ avatar: data.avatar || data.avatarUrl })
+      clearError()
     },
     onError: (error: any) => {
-      setError(error.response?.data?.message || "Failed to upload avatar")
+      console.log(error)
+      setError(error.response?.data?.message || "Failed to update avatar")
     },
   })
 
@@ -216,10 +218,55 @@ export default function ProfilePage() {
     updatePasswordMutation.mutate(passwordForm)
   }
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      uploadAvatarMutation.mutate(file)
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file')
+      return
+    }
+
+    // Validate file size (e.g., 5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size must be less than 5MB')
+      return
+    }
+
+    setIsUploadingAvatar(true)
+    clearError()
+
+    const formDataUpload = new FormData()
+    formDataUpload.append("file", file)
+    formDataUpload.append("upload_preset", UPLOAD_PRESET)
+
+    try {
+      // Upload to Cloudinary
+      const cloudinaryResponse = await axios.post(CLOUDINARY_URL, formDataUpload)
+      const imageURL = cloudinaryResponse.data.secure_url
+      
+      console.log("Image uploaded to Cloudinary:", imageURL)
+      
+      // Update avatar in backend
+      updateAvatarMutation.mutate(imageURL)
+      
+    } catch (err: any) {
+      console.error("Upload failed", err)
+      
+      let errorMessage = "Failed to upload avatar. Please try again."
+      
+      if (err.response?.data?.error?.message) {
+        errorMessage = err.response.data.error.message
+      } else if (err.response?.status === 400) {
+        errorMessage = "Invalid file format. Please choose a valid image."
+      } else if (err.message === "Network Error") {
+        errorMessage = "Network error. Please check your connection."
+      }
+      
+      setError(errorMessage)
+    } finally {
+      setIsUploadingAvatar(false)
     }
   }
 
@@ -250,7 +297,7 @@ export default function ProfilePage() {
       <Grid container spacing={4}>
         {/* Profile Overview Card */}
         <Grid size={{xs:12, md:4}}>
-          <Card sx={{ borderRadius: 3, boxShadow: theme.shadows[4] }}>
+          <Card sx={{ borderRadius: 1.5, boxShadow: theme.shadows[4] }}>
             <CardContent sx={{ textAlign: "center", p: 4 }}>
               <Box position="relative" display="inline-block" mb={3}>
                 <Avatar
@@ -272,6 +319,7 @@ export default function ProfilePage() {
                   id="avatar-upload"
                   type="file"
                   onChange={handleAvatarUpload}
+                  disabled={isUploadingAvatar || updateAvatarMutation.isPending}
                 />
                 <label htmlFor="avatar-upload">
                   <IconButton
@@ -286,9 +334,13 @@ export default function ProfilePage() {
                         backgroundColor: "primary.dark",
                       },
                     }}
-                    disabled={uploadAvatarMutation.isPending}
+                    disabled={isUploadingAvatar || updateAvatarMutation.isPending}
                   >
-                    {uploadAvatarMutation.isPending ? <CircularProgress size={20} color="inherit" /> : <PhotoCamera />}
+                    {(isUploadingAvatar || updateAvatarMutation.isPending) ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <PhotoCamera />
+                    )}
                   </IconButton>
                 </label>
               </Box>
@@ -337,14 +389,6 @@ export default function ProfilePage() {
                     Bookmarked
                   </Typography>
                 </Grid>
-                <Grid size={{xs:6}}>
-                  <Typography variant="h6" fontWeight={600} color="success.main">
-                    {userStats.joinDate}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Joined
-                  </Typography>
-                </Grid>
               </Grid>
             </CardContent>
           </Card>
@@ -352,7 +396,7 @@ export default function ProfilePage() {
 
         {/* Settings Tabs */}
         <Grid size={{xs:12, md:8}}>
-          <Card sx={{ borderRadius: 3, boxShadow: theme.shadows[4] }}>
+          <Card sx={{ borderRadius: 1.5, boxShadow: theme.shadows[4] }}>
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
               <Tabs value={tabValue} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
                 <Tab icon={<Person />} label="Profile" />

@@ -22,6 +22,14 @@ function App() {
       <Route path="/register" element={<SignupPage />} />
       <Route path="/" element={<LandingPage />} />
       <Route
+          path="/app/onboarding"
+          element={
+            <ProtectedRoute>
+              <OnboardingFlow />
+            </ProtectedRoute>
+          }
+      />
+      <Route
         path="/app"
         element={
           <ProtectedRoute>
@@ -29,14 +37,6 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route
-            path="/app/onboarding"
-            element={
-              <ProtectedRoute>
-                <OnboardingFlow />
-              </ProtectedRoute>
-            }
-        />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="notes/new" element={<NewNotePage />} />
         <Route path="notes" element={<AllNotesPage />} />

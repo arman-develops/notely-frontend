@@ -2,8 +2,8 @@ import type React from "react"
 import { useState } from "react"
 import { Box, Typography, TextField, Button, Avatar, IconButton, Alert } from "@mui/material"
 import { PhotoCamera, Person, CloudUpload } from "@mui/icons-material"
-import { useMutation } from "@tanstack/react-query"
-import axiosInstance from "../../service/AxiosInstance"
+import { CLOUDINARY_URL, UPLOAD_PRESET } from "../../service/Cloudinary"
+import axios from "axios"
 
 interface ProfileData {
   bio: string
@@ -17,69 +17,62 @@ interface ProfileStepProps {
   onBack: () => void
 }
 
-interface UploadResponse {
-  url: string
-  message?: string
-}
-
 export default function ProfileStep({ profileData, onProfileChange, onNext, onBack }: ProfileStepProps) {
   const [uploadError, setUploadError] = useState<string | null>(null)
-
-  const uploadMutation = useMutation({
-    mutationFn: async (file: File): Promise<UploadResponse> => {
-      const formData = new FormData()
-      formData.append("avatar", file)
-
-      const response = await axiosInstance.post("/upload/avatar", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      return response.data
-    },
-    onSuccess: (data: UploadResponse) => {
-      console.log("Avatar uploaded:", data)
-      onProfileChange({ ...profileData, avatar: data.url })
-      setUploadError(null)
-    },
-    onError: (error: any) => {
-      console.error("Avatar upload error:", error)
-
-      let errorMessage = "Failed to upload avatar. Please try again."
-
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message
-      } else if (error.response?.status === 413) {
-        errorMessage = "File too large. Please choose a smaller image."
-      } else if (error.response?.status === 400) {
-        errorMessage = "Invalid file format. Please choose a valid image."
-      }
-
-      setUploadError(errorMessage)
-    },
-  })
+  const [isUploading, setIsUploading] = useState(false)
 
   const handleChange = (field: keyof ProfileData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     onProfileChange({ ...profileData, [field]: e.target.value })
   }
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     // Validate file type
-    if (!file.type.startsWith("image/")) {
-      setUploadError("Please select a valid image file.")
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Please select a valid image file')
       return
     }
 
-    // Validate file size (5MB limit)
+    // Validate file size (e.g., 5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError("File size must be less than 5MB.")
+      setUploadError('File size must be less than 5MB')
       return
     }
 
-    uploadMutation.mutate(file)
+    setIsUploading(true)
+    setUploadError(null)
+
+    const formDataUpload = new FormData()
+    formDataUpload.append("file", file)
+    formDataUpload.append("upload_preset", UPLOAD_PRESET)
+
+    try {
+      const res = await axios.post(CLOUDINARY_URL, formDataUpload)
+      const imageURL = res.data.secure_url
+      
+      // Update the profile data with the new avatar URL
+      onProfileChange({ ...profileData, avatar: imageURL })
+      
+      console.log("Avatar uploaded successfully:", imageURL)
+    } catch (err: any) {
+      console.error("Upload failed", err)
+      
+      let errorMessage = "Failed to upload avatar. Please try again."
+      
+      if (err.response?.data?.error?.message) {
+        errorMessage = err.response.data.error.message
+      } else if (err.response?.status === 400) {
+        errorMessage = "Invalid file format. Please choose a valid image."
+      } else if (err.message === "Network Error") {
+        errorMessage = "Network error. Please check your connection."
+      }
+      
+      setUploadError(errorMessage)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   return (
@@ -117,12 +110,12 @@ export default function ProfileStep({ profileData, onProfileChange, onNext, onBa
             id="avatar-upload"
             type="file"
             onChange={handleAvatarUpload}
-            disabled={uploadMutation.isPending}
+            disabled={isUploading}
           />
           <label htmlFor="avatar-upload">
             <IconButton
               component="span"
-              disabled={uploadMutation.isPending}
+              disabled={isUploading}
               sx={{
                 position: "absolute",
                 bottom: 0,
@@ -134,12 +127,12 @@ export default function ProfileStep({ profileData, onProfileChange, onNext, onBa
                 },
               }}
             >
-              {uploadMutation.isPending ? <CloudUpload /> : <PhotoCamera />}
+              {isUploading ? <CloudUpload /> : <PhotoCamera />}
             </IconButton>
           </label>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          {uploadMutation.isPending ? "Uploading..." : "Upload a profile picture (optional)"}
+          {isUploading ? "Uploading..." : "Upload a profile picture (optional)"}
         </Typography>
       </Box>
 

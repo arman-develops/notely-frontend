@@ -36,7 +36,7 @@ import { formatDistanceToNow, format } from "date-fns"
 import { showToast } from "../utils/toast"
 
 interface EditNoteFormData {
-  noteTitle: string
+  title: string
   synopsis: string
   content: string
 }
@@ -48,13 +48,13 @@ export default function EditNotePage() {
   const { updateNote, togglePin, toggleBookmark, deleteNote, setError, error, clearError } = useNotesStore()
 
   const [formData, setFormData] = useState<EditNoteFormData>({
-    noteTitle: "",
+    title: "",
     synopsis: "",
     content: "",
   })
   const [hasChanges, setHasChanges] = useState(false)
   const [originalData, setOriginalData] = useState<EditNoteFormData>({
-    noteTitle: "",
+    title: "",
     synopsis: "",
     content: "",
   })
@@ -73,7 +73,7 @@ export default function EditNotePage() {
   useEffect(() => {
     if (noteData) {
       const initialData = {
-        noteTitle: noteData.noteTitle || "",
+        title: noteData.noteTitle || "",
         synopsis: noteData.synopsis || "",
         content: noteData.content || "",
       }
@@ -88,7 +88,8 @@ export default function EditNotePage() {
   const updateMutation = useMutation({
     mutationFn: async (data: EditNoteFormData) => {
       const response = await axiosInstance.patch(`/entry/${id}`, data)
-      return response.data.data.entry
+      // console.log(response.data.data.updatedEntry)
+      return response.data.data.updatedEntry
     },
     onSuccess: (updatedNote) => {
       updateNote(id!, {
@@ -102,7 +103,7 @@ export default function EditNotePage() {
       
       // Update original data to reflect saved state
       const newData = {
-        noteTitle: updatedNote.noteTitle,
+        title: updatedNote.noteTitle,
         synopsis: updatedNote.synopsis,
         content: updatedNote.content,
       }
@@ -112,6 +113,7 @@ export default function EditNotePage() {
       clearError()
     },
     onError: (error: any) => {
+      console.log(error)
       const errorMessage = error.response?.data?.message || "Failed to update note"
       setError(errorMessage)
       showToast.error(errorMessage)
@@ -174,7 +176,7 @@ export default function EditNotePage() {
   // Check for changes
   useEffect(() => {
     const hasFormChanges =
-      formData.noteTitle !== originalData.noteTitle ||
+      formData.title !== originalData.title ||
       formData.synopsis !== originalData.synopsis ||
       formData.content !== originalData.content
     setHasChanges(hasFormChanges)
@@ -341,8 +343,8 @@ export default function EditNotePage() {
               <TextField
                 fullWidth
                 label="Note Title"
-                value={formData.noteTitle}
-                onChange={handleInputChange("noteTitle")}
+                value={formData.title}
+                onChange={handleInputChange("title")}
                 required
                 variant="outlined"
                 sx={{

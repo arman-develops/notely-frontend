@@ -248,7 +248,7 @@ export default function DashboardPage() {
     return Math.round(((current - previous) / previous) * 100)
   }
 
-  const notesTrend = calculateTrend(thisWeekNotes.length, lastWeekNotes.length)
+  // const notesTrend = calculateTrend(thisWeekNotes.length, lastWeekNotes.length)
 
   // Recent notes (last 5) with proper sorting
   const recentNotes = activeNotes
@@ -406,7 +406,7 @@ export default function DashboardPage() {
             value={activeNotes.length}
             icon={<Description />}
             color={theme.palette.primary.main}
-            trend={notesTrend}
+            // trend={notesTrend}
             onClick={() => navigate("/app/notes")}
           />
         </Grid>

@@ -410,7 +410,7 @@ export default function LandingPage() {
                     sx={{
                       p: 4,
                       height: "100%",
-                      borderRadius: 4,
+                      borderRadius: 3,
                       transition: "all 0.3s ease-in-out",
                       "&:hover": {
                         transform: "translateY(-8px)",
@@ -463,7 +463,7 @@ export default function LandingPage() {
                   sx={{
                     p: 4,
                     height: "100%",
-                    borderRadius: 4,
+                    borderRadius: 3,
                     position: "relative",
                     "&::before": {
                       content: "''",
@@ -566,7 +566,7 @@ export default function LandingPage() {
                 Your digital sanctuary for thoughts, ideas, and inspiration.
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                © 2024 Notely. All rights reserved.
+                © {new Date().getFullYear()} Notely. All rights reserved.
               </Typography>
             </Grid>
             <Grid size={{xs:12, md:6}}>

@@ -31,6 +31,7 @@ import { useNotesStore } from "../store/NotesStore"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "../service/AxiosInstance"
 import { formatDistanceToNow } from "date-fns"
+import { showToast } from "../utils/toast"
 
 interface NoteCardProps {
   note: {
@@ -101,7 +102,7 @@ function NoteCard({ note, onEdit, onDelete, onView, onTogglePin, onToggleBookmar
         <Typography variant="body2" color="text.secondary" component="p" mb={1}>
           {note.synopsis}
         </Typography>
-        <Box display="flex" gap={1} mb={2}>
+        <Box display="flex" flexDirection="column" gap={1} mb={2}>
           <Chip
             label={`Created ${formatDistanceToNow(new Date(note.dateCreated))} ago`}
             size="small"
@@ -291,6 +292,7 @@ export default function AllNotesPage() {
       console.log("Found note for pinning:", note.noteTitle, "Current pin status:", note.isPinned)
       // Toggle the current state - send the opposite of current state
       pinMutation.mutate({ noteId: id, isPinned: !note.isPinned })
+      showToast.success("Entry pinned successfully")
     } else {
       console.error("Note not found for ID:", id)
       setError("Note not found")

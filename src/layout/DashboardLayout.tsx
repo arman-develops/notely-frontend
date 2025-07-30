@@ -163,7 +163,7 @@ export default function DashboardLayout() {
                   <ListItemButton
                     onClick={() => handleNavigation(item.path)}
                     sx={{
-                      borderRadius: 4,
+                      borderRadius: 3,
                       minHeight: 56,
                       backgroundColor: isActive
                         ? alpha(theme.palette.primary.main, 0.12)
