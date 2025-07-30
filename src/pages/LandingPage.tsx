@@ -397,7 +397,7 @@ export default function LandingPage() {
               </span>
             </Typography>
             <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: "auto" }}>
-              Powerful features designed to make note-taking effortless and enjoyable
+              AI-Powered features designed to make note-taking effortless and enjoyable
             </Typography>
           </Box>
 
