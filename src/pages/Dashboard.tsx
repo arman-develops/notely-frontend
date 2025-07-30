@@ -703,7 +703,7 @@ export default function DashboardPage() {
                               fontWeight={500}
                               noWrap
                             >
-                              {note.title || "Untitled"}
+                              {note.noteTitle || "Untitled"}
                             </Typography>
                           }
                           secondary={
@@ -764,7 +764,7 @@ export default function DashboardPage() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          <Card sx={{ borderRadius: 3, boxShadow: theme.shadows[2], mb: 3 }}>
+          <Card sx={{ borderRadius: 1, boxShadow: theme.shadows[2], mb: 3 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>
                 Activity Summary
